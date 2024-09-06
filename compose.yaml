@@ -1,0 +1,12 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+#      dockerfile: dev.Dockerfile
+      args:
+        - "UID=${UID:-1000}"
+    volumes:
+      - ./app:/src/app
+    ports:
+      - "5000:5000"
