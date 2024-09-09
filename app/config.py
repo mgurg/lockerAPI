@@ -11,16 +11,10 @@ APP_DIR = Path(__file__).parent.parent / "app"
 class Settings(BaseSettings):
     PROJECT_DIR: os.PathLike[str] = Path(__file__).parent.parent
 
-    # POSTGRESQL DEFAULT DATABASE
-    DEFAULT_DATABASE_HOSTNAME: str | None = os.getenv("DB_HOST")
-    DEFAULT_DATABASE_PORT: str | None = os.getenv("DB_PORT")
-    DEFAULT_DATABASE_DB: str | None = os.getenv("DB_DATABASE")
-    DEFAULT_DATABASE_USER: str | None = os.getenv("DB_USERNAME")
-    DEFAULT_DATABASE_PASSWORD: str | None = os.getenv("DB_PASSWORD")
-
-    DB_CONFIG_PG: PostgresDsn = "postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@db:5432/{DB_NAME}".format(
+    DB_POSTGRES_URL: PostgresDsn = "postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DB_NAME}".format(
         DB_USER=os.getenv("DB_USERNAME"),
         DB_PASSWORD=os.getenv("DB_PASSWORD"),
+        DB_HOST=os.getenv("DB_HOST"),
         DB_NAME=os.getenv("DB_DATABASE"),
     )
 

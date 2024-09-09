@@ -4,7 +4,6 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.db import get_db
 from app.models.models import Room
