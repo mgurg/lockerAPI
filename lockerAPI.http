@@ -1,0 +1,4 @@
+@item_uuid = 39285ee2-487f-4e8d-acda-66d390b546ca
+### GET request to example server
+###
+GET http://localhost:5000/rooms/{{item_uuid}}
