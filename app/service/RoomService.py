@@ -6,8 +6,8 @@ from starlette.status import (
     HTTP_404_NOT_FOUND,
 )
 
-from app.models.models import Room
-from app.repository.RoomRepo import RoomRepo
+from app.datbase.models.models import Room
+from app.datbase.repository.RoomRepo import RoomRepo
 
 
 class RoomService:
