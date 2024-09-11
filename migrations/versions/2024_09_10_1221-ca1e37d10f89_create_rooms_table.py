@@ -23,7 +23,7 @@ def upgrade() -> None:
         'rooms',
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
         sa.Column('uuid', sa.UUID(), nullable=False),
-        sa.Column('url', sa.String(), nullable=False),
+        sa.Column('url_slug', sa.String(), nullable=False),
         sa.Column('city_id', sa.Integer(), nullable=False),
         sa.Column('location_id', sa.Integer(), nullable=True),
         sa.Column('name', sa.String(), nullable=False),

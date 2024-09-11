@@ -70,13 +70,26 @@ class Room(BaseModel):
     __tablename__ = "rooms"
 
     uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True))
-    url: Mapped[str]
+    url_slug: Mapped[str]
     city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"))
     location_id: Mapped[int | None] = mapped_column(ForeignKey("locations.id"))
     name: Mapped[str]
 
     city: Mapped["City"] = relationship(back_populates="rooms")
     location: Mapped[Optional["Location"]] = relationship(back_populates="rooms")
-    # translations: Mapped[List["RoomTranslation"]] = relationship(back_populates="room")
+    translations: Mapped[list["RoomTranslation"]] = relationship(back_populates="room")
     # languages: Mapped[List["Language"]] = relationship(secondary="room_language", back_populates="rooms")
     # tags: Mapped[List["Tag"]] = relationship(secondary="room_tag", back_populates="rooms")
+
+
+class RoomTranslation(BaseModel):
+    __tablename__ = "room_translations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
+    lang: Mapped[str] = mapped_column(String(2))
+    title: Mapped[str] = mapped_column(String(128))
+    lead: Mapped[str | None] = mapped_column(String(512))
+    description: Mapped[str | None] = mapped_column(String(512))
+
+    room: Mapped["Room"] = relationship(back_populates="translations")

@@ -1,4 +1,36 @@
 @item_uuid = 39285ee2-487f-4e8d-acda-66d390b546ca
 ### GET request to example server
-###
 GET http://localhost:5000/rooms/{{item_uuid}}
+
+
+### ADD NEW ROOM
+POST http://localhost:5000/rooms
+Accept: application/json
+Cache-Control: no-cache
+Content-Type: application/json
+
+{
+  "name": "Piwnica 2.0  - Pokój żużlowy",
+  "city_id": 3,
+  "location": {
+    "street_address": "Nowy Świat 15/17",
+    "city": "Warsaw",
+    "state_province": "Mazowieckie",
+    "postal_code": "00-029",
+    "country": "Poland",
+    "lat": 52.229675,
+    "lng": 21.012230
+  },
+  "translation": {
+    "lang": "pl",
+    "title": "Piwnica 2.0  - Pokój żużlowy",
+    "lead": "Wyścig o życie",
+    "description": "Stań do wyścigu o wszystko, nie zapomnij zebrać drużyny!"
+  }
+}
+
+### GET room by URL SLUG
+GET http://localhost:5000/rooms/url/pl/piwnica-2-0-pokoj-zuzlowy-warsaw
+Accept: application/json
+Cache-Control: no-cache
+Content-Type: application/json

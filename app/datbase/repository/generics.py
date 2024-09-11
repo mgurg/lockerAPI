@@ -7,6 +7,7 @@ from app.datbase.models.models import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
 
+
 class GenericRepo(Generic[T]):
     def __init__(self, session: AsyncSession, model: type[T]):
         """
