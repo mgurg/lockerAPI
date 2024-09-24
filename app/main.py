@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.controller.places import place_router
 from app.controller.rooms import room_router
 
 origins = ["http://localhost", "http://localhost:8080", "*"]
@@ -24,6 +25,7 @@ def create_application() -> FastAPI:
     )
 
     app.include_router(room_router, prefix="/rooms", tags=["ROOM"])
+    app.include_router(place_router, prefix="/places", tags=["PLACE"])
 
     return app
 

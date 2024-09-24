@@ -22,10 +22,11 @@ def upgrade() -> None:
         'room_translations',
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
         sa.Column('room_id', sa.Integer(), nullable=False),
-        sa.Column('lang', sa.String(length=2), nullable=False),
-        sa.Column('title', sa.String(length=128), nullable=False),
-        sa.Column('lead', sa.String(length=512), nullable=True),
-        sa.Column('description', sa.String(length=512), nullable=True),
+        sa.Column('lang', sa.String(), nullable=False),
+        sa.Column('title', sa.String(), nullable=False),
+        sa.Column('lead', sa.String(), nullable=True),
+        sa.Column('description', sa.String(), nullable=True),
+        sa.Column('is_ai', sa.Boolean(), nullable=True),
         sa.ForeignKeyConstraint(['room_id'], ['rooms.id'], ),
         sa.PrimaryKeyConstraint('id')
     )

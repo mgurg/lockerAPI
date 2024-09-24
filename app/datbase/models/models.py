@@ -1,7 +1,7 @@
 from typing import Optional
 
 import sqlalchemy as sa
-from sqlalchemy import ForeignKey, Numeric, String
+from sqlalchemy import Column, ForeignKey, Integer, Numeric, String, Table, func, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -22,9 +22,12 @@ class BaseModel(Base):
     id: Mapped[int] = mapped_column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
 
 
-# class Room(BaseModel):
-#     __tablename__ = "rooms"
-#     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+room_language_link = Table(
+    "room_language_link",
+    Base.metadata,
+    Column("room_id", sa.Integer, ForeignKey("rooms.id", ondelete="CASCADE"), primary_key=True),
+    Column("language_id", sa.Integer, ForeignKey("languages.id", ondelete="CASCADE"), primary_key=True)
+)
 
 
 class Location(BaseModel):
@@ -42,17 +45,24 @@ class Location(BaseModel):
 
 class City(BaseModel):
     __tablename__ = "cities"
-    local_id: Mapped[str]
-    local_id_type: Mapped[str]
-    population: Mapped[int | None]
+    # local_id: Mapped[str]
+    # local_id_type: Mapped[str]
     lat: Mapped[float | None] = mapped_column(Numeric(10, 7))
     lng: Mapped[float | None] = mapped_column(Numeric(10, 7))
+    lat_min: Mapped[float | None] = mapped_column(Numeric(10, 7))
+    lng_min: Mapped[float | None] = mapped_column(Numeric(10, 7))
+    lat_max: Mapped[float | None] = mapped_column(Numeric(10, 7))
+    lng_max: Mapped[float | None] = mapped_column(Numeric(10, 7))
+    population: Mapped[int | None]
+    importance: Mapped[float | None]
     category: Mapped[str] = mapped_column(String(16))
     region: Mapped[str | None] = mapped_column(String(64))
     country: Mapped[str | None] = mapped_column(String(2))
+    # seo_title: Mapped[str | None] = mapped_column(String(100))
+    # seo_description: Mapped[str | None] = mapped_column(String(200))
 
-    rooms: Mapped[list["Room"]] = relationship(back_populates="city")
-    normalized_geo_names: Mapped[list["GeoName"]] = relationship(back_populates="city")
+    # rooms: Mapped[list["Room"]] = relationship(back_populates="city")
+    geo_names: Mapped[list["GeoName"]] = relationship(back_populates="city")
 
 
 class GeoName(BaseModel):
@@ -63,7 +73,7 @@ class GeoName(BaseModel):
     country: Mapped[str] = mapped_column(String(2))
     lang: Mapped[str] = mapped_column(String(2))
 
-    city: Mapped["City"] = relationship(back_populates="normalized_geo_names")
+    city: Mapped["City"] = relationship(back_populates="geo_names")
 
 
 class Room(BaseModel):
@@ -71,15 +81,42 @@ class Room(BaseModel):
 
     uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True))
     url_slug: Mapped[str]
-    city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"))
+    # city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"))
     location_id: Mapped[int | None] = mapped_column(ForeignKey("locations.id"))
     name: Mapped[str]
+    active: Mapped[bool]
+    players_min: Mapped[int | None]
+    players_max: Mapped[int | None]
+    price_from: Mapped[float | None]
+    game_duration: Mapped[int | None]
+    game_difficulty: Mapped[str | None]
+    game_fear_index: Mapped[str | None]
+    reservation_url: Mapped[str | None]
+    url_yt: Mapped[str | None]
+    lm_id: Mapped[str | None]
+    mt_id: Mapped[str | None]
+    order: Mapped[str | None]
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
 
-    city: Mapped["City"] = relationship(back_populates="rooms")
+    # city: Mapped["City"] = relationship(back_populates="rooms")
     location: Mapped[Optional["Location"]] = relationship(back_populates="rooms")
     translations: Mapped[list["RoomTranslation"]] = relationship(back_populates="room")
-    # languages: Mapped[List["Language"]] = relationship(secondary="room_language", back_populates="rooms")
+    languages: Mapped[list["Language"]] = relationship(secondary="room_language_link", back_populates="rooms")
     # tags: Mapped[List["Tag"]] = relationship(secondary="room_tag", back_populates="rooms")
+
+
+class Language(Base):
+    __tablename__ = "languages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    code: Mapped[str] = mapped_column(String, nullable=False)
+
+    # Many-to-many relationship with Room
+    rooms: Mapped[list[Room]] = relationship(
+        secondary=room_language_link, back_populates="languages"
+    )
 
 
 class RoomTranslation(BaseModel):
@@ -91,5 +128,6 @@ class RoomTranslation(BaseModel):
     title: Mapped[str] = mapped_column(String(128))
     lead: Mapped[str | None] = mapped_column(String(512))
     description: Mapped[str | None] = mapped_column(String(512))
+    is_ai: Mapped[bool | None] = mapped_column(Boolean)
 
     room: Mapped["Room"] = relationship(back_populates="translations")

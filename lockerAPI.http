@@ -3,6 +3,42 @@
 GET http://localhost:5000/rooms/{{item_uuid}}
 
 
+### ADD NEW PLACE
+POST http://localhost:5000/places
+Accept: application/json
+Cache-Control: no-cache
+Content-Type: application/json
+
+{
+  "lat": 52.2296756,
+  "lng": 21.0122287,
+  "lat_min": 52.0296756,
+  "lat_max": 52.4296756,
+  "lng_min": 20.8122287,
+  "lng_max": 21.2122287,
+  "population": 1790658,
+  "importance": 1.0,
+  "category": "city",
+  "region": "mazowieckie",
+  "country": "pl",
+  "geo_names": [
+    {
+      "name": "Warszawa",
+      "lang": "pl"
+    },
+    {
+      "name": "Warsaw",
+      "lang": "en"
+    }
+  ]
+}
+
+### ADD NEW PLACE
+GET http://localhost:5000/places/katowice
+Accept: application/json
+Cache-Control: no-cache
+Content-Type: application/json
+
 ### ADD NEW ROOM
 POST http://localhost:5000/rooms
 Accept: application/json
@@ -11,7 +47,7 @@ Content-Type: application/json
 
 {
   "name": "Piwnica 2.0  - Pokój żużlowy",
-  "city_id": 3,
+  "city_id": 1,
   "location": {
     "street_address": "Nowy Świat 15/17",
     "city": "Warsaw",
@@ -29,8 +65,71 @@ Content-Type: application/json
   }
 }
 
+
+
+
+
 ### GET room by URL SLUG
-GET http://localhost:5000/rooms/url/pl/piwnica-2-0-pokoj-zuzlowy-warsaw
+GET http://localhost:5000/rooms/url/pl/matrix
 Accept: application/json
 Cache-Control: no-cache
 Content-Type: application/json
+
+
+
+//[
+//    {
+//        "room_id": "room-13761",
+//        "room_name": "Uniwersytet Potworny",
+//        "city": "Wrocław",
+//        "url": "https://lock.me/pl/poland/dolnoslaskie/wroclaw/escape-room/trap-jungle/13761-uniwersytet-potworny",
+//        "creator_brand": "Trap Jungle",
+//        "players": "2-4",
+//        "game_time": "60",
+//        "category": "Przygodowy",
+//        "difficulty": "początkujący",
+//        "players_difficulty": null,
+//        "price_from": 290.0,
+//        "currency": "zł",
+//        "badge": null,
+//        "active": true,
+//        "state": "open",
+//        "data_lat": "51.120145373471",
+//        "data_lng": "17.031662464142",
+//        "item_category": "room",
+//        "room_list_index": 0,
+//        "visited": 0,
+//        "want_to_visit": 96,
+//        "id": "13761-uniwersytet-potworny",
+//        "url_desc": "http://www.trap-jungle.com",
+//        "lat": "51.120145373471",
+//        "lng": "17.031662464142",
+//        "phoneNo": "666378206(jeślinieodbieramyzostawwiadomośćSMS)",
+//        "youtube_videos": [],
+//        "isPartner": false,
+//        "title": "Uniwersytet Potworny",
+//        "basic_info": [
+//            "Przyjazny rodzinom z dziećmi",
+//            "Gra bez aktora",
+//            "Nieodpowiednie dla osób z klaustrofobią"
+//        ],
+//        "safety": [
+//            "Pełen monitoring",
+//            "Pełen kontakt z mistrzem gry",
+//            "Przycisk bezpieczeństwa",
+//            "Tylko niskie napięcie w zasięgu gracza"
+//        ],
+//        "languages": [
+//            "polski"
+//        ],
+//        "hasPromo": false,
+//        "description": "Baterie dostarczające energię do miasta Monstropolis są już na wyczerpaniu. Nawet najbardziej przerażający straszolodzy nie są w stanie wywołać, potrzebnego do utrzymania fabryki i miasta, krzyku wśród dzieci. Musicie przejść przyspieszony kurs na straszaków i uratować fabrykę, miasto i wszystkich jego mieszkańców! A może nawet uda Wam się znaleźć inny, skuteczniejszy sposób na naładowanie baterii niż wrzaski? Potwory i spółka czekają na Waszą pomoc!",
+//        "number_of_persons": null,
+//        "duration": "60",
+//        "type": "Przygodowy",
+//        "telephone": "666378206 (jeśli nie odbieramy zostaw wiadomość SMS)",
+//        "creator_url": "https://lock.me/pl/company/trap-jungle",
+//        "creator_logo": "https://img.lock.me/company/733-trap-jungle-5ec63521ad7149.50904548.webp?w=290&h=290&s=98dcb6db0f2142d5af73fde5554ba00a",
+//        "creator_address": "Pomorska 45 \r\n50-217 Wrocław\r\nWejście do lokalu od ul. Paulińskiej (NIE OD PODWÓRKA!) białe, przeszklone drzwi.",
+//        "reviews": []
+//    },

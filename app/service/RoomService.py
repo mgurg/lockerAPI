@@ -3,6 +3,7 @@ from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import Depends, HTTPException
+from pydantic_extra_types.country import CountryAlpha2
 from sqlalchemy import BinaryExpression
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
@@ -48,24 +49,31 @@ class RoomService:
 
         return db_item
 
-    async def get_room_by_url_slug_and_language(self, room_url_slug, lang_code,
+    async def get_room_by_url_slug_and_language(self, room_url_slug, lang_code: CountryAlpha2,
                                                 load_relations: list[str | BinaryExpression] = None):
         db_item = await self.room_repo.get_by_url_slug_and_lang(room_url_slug, lang_code, load_relations)
         if not db_item:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Room `{room_url_slug}` not found!")
 
         # Fetch the specific translation for the given language
-        translation = next((t for t in db_item.translations if t.lang == lang_code), None)
-        db_item.translations = [translation] if translation else []
+        translation = next((t for t in db_item.translations if t.lang == lang_code.lower()), None)
+        db_item.translation = translation if translation else None
 
         return db_item
+
+    async def get_room_by_location_and_language(self, location: str, language: str,
+                                                load_relations: list[str | BinaryExpression] = None):
+
+        db_items = await self.room_repo.get_by_location_and_language(location, language, load_relations)
+
+        return db_items
 
     async def room_exists_by_url_slug(self, room_url_slug: str) -> bool:
         db_item = await self.room_repo.get_by_url_slug(room_url_slug)
         return db_item is not None
 
     async def create_room(self, room: RoomAdd) -> Room | None:
-        db_city = await self.city_repo.get_by_id(3)
+        # db_city = await self.city_repo.get_by_id(3)
 
         try:
             unique_slug = await self.generate_unique_slug(room.name, room.location.city)
@@ -73,8 +81,6 @@ class RoomService:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
         if room.location:
-            print(room.location.street_address)
-            print(room.location.city)
             location_data = {
                 "street_address": room.location.street_address,
                 "city": room.location.city,
@@ -90,9 +96,14 @@ class RoomService:
                 "uuid": str(uuid4()),
                 "url_slug": unique_slug,
                 "name": room.name,
-                # "city_id": 3,
-                "city": db_city,
-                "location": db_location
+                "active": True,
+                # "city": db_city,
+                "location": db_location,
+                "price_from" : room.price_from,
+                "game_duration" : room.game_duration,
+                "reservation_url" : room.reservation_url,
+                "lm_id" : room.lm_id,
+                "mt_id" : room.mt_id,
             }
 
             new_db_room = await self.room_repo.create(**room_data)
@@ -112,24 +123,21 @@ class RoomService:
     @staticmethod
     def sanitize_input(input_str: str) -> str:
         """
-        Sanitize string to make it URL-friendly.
+        Sanitize string to make it URL-safe.
         Remove non-alphanumeric characters, replace spaces with hyphens,
-        and remove duplicate hyphens.
+        and handle duplicate or leading/trailing hyphens.
         """
         # Transliterate Unicode characters to ASCII
-        ascii_str = unidecode(input_str)
+        safe_name = unidecode(input_str)
 
-        # Replace non-alphanumeric characters (except hyphens) with spaces
-        cleaned_str = re.sub(r"[^a-zA-Z0-9\s-]", " ", ascii_str)
+        # Replace non-alphanumeric characters (except hyphens and spaces) with spaces
+        cleaned_str = re.sub(r"[^a-zA-Z0-9\s-]", " ", safe_name)
 
-        # Replace spaces with hyphens and convert to lowercase
+        # Replace spaces with hyphens, convert to lowercase, and remove duplicate hyphens
         hyphenated_str = re.sub(r"\s+", "-", cleaned_str).lower()
 
-        # Remove duplicate hyphens
-        single_hyphen_str = re.sub(r"-+", "-", hyphenated_str)
-
         # Remove leading and trailing hyphens
-        return single_hyphen_str.strip("-")
+        return hyphenated_str.strip("-")
 
     async def generate_unique_slug(self, name: str, street_address: str) -> str:
         """Generate a unique URL-friendly slug."""

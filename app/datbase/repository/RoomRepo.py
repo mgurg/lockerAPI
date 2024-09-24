@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Sequence
 from uuid import UUID
 
 from fastapi import Depends
@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.datbase.db import get_db
-from app.datbase.models.models import Room, RoomTranslation
+from app.datbase.models.models import Room, RoomTranslation, Location
 from app.datbase.repository.generics import GenericRepo
 
 UserDB = Annotated[AsyncSession, Depends(get_db)]
@@ -45,13 +45,40 @@ class RoomRepo(GenericRepo[Room]):
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
+    async def get_by_location_and_language(self, slug: str, lang_code: str,
+                                       load_relations: list[str | BinaryExpression] = None) -> Room | None:
+
+        ...
+
+    async def get_by_bbox(self, min_lng: float, max_lng: float, min_lat: float, max_lat: float,
+                          load_relations: list[str | BinaryExpression] = None) -> Sequence[Room]:
+        # bbox = left,bottom,right,top
+        # bbox = min Longitude , min Latitude , max Longitude , max Latitude
+
+        location_subquery = (
+            select(Location.id)
+            .where(
+                (Location.lng >= min_lng) & (Location.lng <= max_lng),
+                (Location.lat >= min_lat) & (Location.lat <= max_lat)
+            ).subquery()
+        )
+
+        # Join the rooms with the locations subquery
+        query = (
+            select(self.Model)
+            .join(location_subquery, self.Model.location_id == location_subquery.c.id)
+        )
+
+        result = await self.session.execute(query)
+        return result.scalars().all()
+
     async def get_by_url_slug_and_lang(self, slug: str, lang_code: str,
                                        load_relations: list[str | BinaryExpression] = None) -> Room | None:
         # Solution 1
         query = (
             select(self.Model)
             .join(Room.translations)  # Join the RoomTranslation table
-            .where(self.Model.url_slug == slug, RoomTranslation.lang == lang_code)
+            .where(self.Model.url_slug == slug, RoomTranslation.lang == lang_code.lower())
         )
 
         # Solution 2

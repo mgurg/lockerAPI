@@ -3,7 +3,12 @@
 
 ## Migrations
 
-**Run commands inside a docker container**
+New migration
+```bash
+alembic revision -m "create XXX table"
+```
+> [!NOTE]  
+> Run below commands inside a docker container
 
 Check current revision
 ```bash
@@ -22,3 +27,11 @@ To roll back the latest migration operation, you may use the `alembic downgrade`
 
 Revision History: Use `.venv/bin/alembic history` to see the history of migrations and understand the steps involved.
 Detailed View: Use `.venv/bin/alembic show <revision>` to get detailed information about specific revision scripts.
+
+## ADR
+
+http://localhost:5000/{language}/r/{room_name}
+http://localhost:5000/{language}/l/{location}
+http://localhost:5000/{language}/l/{location}/{tag}
+http://localhost:5000/{language}/c/{company_name}
+
