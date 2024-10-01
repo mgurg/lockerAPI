@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.13.2",
     "fastapi[standard]>=0.114.0",
+    "loguru>=0.7.2",
     "psycopg[binary]>=3.2.1",
     "pycountry>=24.6.1",
     "pydantic-extra-types>=2.9.0",
@@ -53,4 +54,4 @@ exclude = ["migrations"]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
-known-third-party = ["fastapi", "pydantic", "starlette"]
+known-third-party = ["fastapi", "pydantic", "starlette", "sqlalchemy"]

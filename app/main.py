@@ -1,8 +1,14 @@
+import sys
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from loguru import logger
 
 from app.controller.places import place_router
 from app.controller.rooms import room_router
+
+logger.add("logs/locker_api.log", format="{time} {level} {message}", level="INFO", backtrace=False, diagnose=False)
+logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
 
 origins = ["http://localhost", "http://localhost:8080", "*"]
 
