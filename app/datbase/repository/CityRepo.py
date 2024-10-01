@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Sequence
 from uuid import UUID
 
 from fastapi import Depends
@@ -44,3 +44,17 @@ class CityRepo(GenericRepo[City]):
         city = result.scalars().first()
 
         return city
+
+    async def get_places_by_bbox(self, latitude: float, longitude: float) -> Sequence[City]:
+        query = (
+            select(self.Model)
+            .where(
+                (self.Model.lat_min <= latitude) &
+                (self.Model.lat_max >= latitude) &
+                (self.Model.lng_min <= longitude) &
+                (self.Model.lng_max >= longitude)
+            )
+        )
+
+        result = await self.session.execute(query)
+        return result.scalars().all()

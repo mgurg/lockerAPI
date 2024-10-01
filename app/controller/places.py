@@ -16,7 +16,7 @@ placeServiceDependency = Annotated[PlaceService, Depends()]
 @place_router.get("/{location_name}")
 async def place_by_uuid(place_service: placeServiceDependency, location_name: str,
                         language: LanguageAlpha2 | None = None):
-    db_item = await place_service.get_place_by_name(location_name, language)
+    db_item = await place_service.get_rooms_by_location(location_name, language)
 
     return db_item
 

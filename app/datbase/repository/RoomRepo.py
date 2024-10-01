@@ -69,6 +69,7 @@ class RoomRepo(GenericRepo[Room]):
             .join(location_subquery, self.Model.location_id == location_subquery.c.id)
         )
 
+        query = self._apply_relationship_loading(query, load_relations)
         result = await self.session.execute(query)
         return result.scalars().all()
 

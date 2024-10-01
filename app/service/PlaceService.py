@@ -28,15 +28,19 @@ class PlaceService:
         self.location_repo = location_repo
         self.room_translation_repo = room_translation_repo
 
-    async def get_place_by_name(self, place_name: str, language: LanguageAlpha2 | None = None):
+    async def get_rooms_by_location(self, place_name: str, language: LanguageAlpha2 | None = None):
         url_safe_place = RoomService.sanitize_input(place_name)
         city = await self.city_repo.get_place_by_name(url_safe_place)
         if city is None:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Place `{place_name}` as: `{url_safe_place}` not found!")
 
         print(city.lng_min, city.lng_max, city.lat_min, city.lat_max)
-        rooms = await self.room_repo.get_by_bbox(city.lng_min, city.lng_max, city.lat_min, city.lat_max)
+        rooms = await self.room_repo.get_by_bbox(city.lng_min, city.lng_max, city.lat_min, city.lat_max, ["translations"])
 
+        lang_code = "pl"
+        for room in rooms:
+            translation = next((t for t in room.translations if t.lang == lang_code.lower()), None)
+            room.translation = translation if translation else None
         return rooms
 
     async def create_place(self, place: PlaceAdd):
@@ -67,8 +71,3 @@ class PlaceService:
 
             await self.geo_name_repo.create(**geo_name_data)
         return None
-
-    # @staticmethod
-    # def url_safe_name(text: str) -> str:
-    #     safe_name = unidecode(unidecode(text))
-    #     return re.sub("[^a-z0-9-]", "", safe_name.lower().replace(" ", "-"))

@@ -1,6 +1,7 @@
 import re
 from typing import Annotated
 from uuid import UUID, uuid4
+from loguru import logger
 
 from fastapi import Depends, HTTPException
 from pydantic_extra_types.country import CountryAlpha2
@@ -73,12 +74,18 @@ class RoomService:
         return db_item is not None
 
     async def create_room(self, room: RoomAdd) -> Room | None:
-        # db_city = await self.city_repo.get_by_id(3)
-
+        if room.location.lat and room.location.lng:
+            db_cities = await self.city_repo.get_places_by_bbox(room.location.lat, room.location.lng)
+            for city in db_cities:
+                logger.info(f"Matching `{room.name}` with {city.id}")
+        else:
+            logger.warning(f"No lat long data for `{room.name}`: {room.location.street_address}, {room.location.city}")
         try:
             unique_slug = await self.generate_unique_slug(room.name, room.location.city)
         except ValueError as e:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(e)) from e
+
+
 
         if room.location:
             location_data = {
@@ -130,11 +137,11 @@ class RoomService:
         # Transliterate Unicode characters to ASCII
         safe_name = unidecode(input_str)
 
-        # Replace non-alphanumeric characters (except hyphens and spaces) with spaces
+        # Replace non-alphanumeric characters (except hyphens) with spaces
         cleaned_str = re.sub(r"[^a-zA-Z0-9\s-]", " ", safe_name)
 
-        # Replace spaces with hyphens, convert to lowercase, and remove duplicate hyphens
-        hyphenated_str = re.sub(r"\s+", "-", cleaned_str).lower()
+        # Replace spaces with hyphens, collapse multiple spaces/hyphens into one
+        hyphenated_str = re.sub(r"[\s-]+", "-", cleaned_str).lower()
 
         # Remove leading and trailing hyphens
         return hyphenated_str.strip("-")
