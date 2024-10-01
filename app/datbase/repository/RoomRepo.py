@@ -1,4 +1,5 @@
-from typing import Annotated, Sequence
+from collections.abc import Sequence
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
@@ -7,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.datbase.db import get_db
-from app.datbase.models.models import Room, RoomTranslation, Location
+from app.datbase.models.models import Location, Room, RoomTranslation
 from app.datbase.repository.generics import GenericRepo
 
 UserDB = Annotated[AsyncSession, Depends(get_db)]

@@ -1,9 +1,9 @@
 import re
 from typing import Annotated
 from uuid import UUID, uuid4
-from loguru import logger
 
 from fastapi import Depends, HTTPException
+from loguru import logger
 from pydantic_extra_types.country import CountryAlpha2
 from sqlalchemy import BinaryExpression
 from starlette.status import (
@@ -85,8 +85,6 @@ class RoomService:
         except ValueError as e:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
-
-
         if room.location:
             location_data = {
                 "street_address": room.location.street_address,
@@ -106,11 +104,11 @@ class RoomService:
                 "active": True,
                 # "city": db_city,
                 "location": db_location,
-                "price_from" : room.price_from,
-                "game_duration" : room.game_duration,
-                "reservation_url" : room.reservation_url,
-                "lm_id" : room.lm_id,
-                "mt_id" : room.mt_id,
+                "price_from": room.price_from,
+                "game_duration": room.game_duration,
+                "reservation_url": room.reservation_url,
+                "lm_id": room.lm_id,
+                "mt_id": room.mt_id,
             }
 
             new_db_room = await self.room_repo.create(**room_data)

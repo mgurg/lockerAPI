@@ -1,9 +1,20 @@
-@item_uuid = 39285ee2-487f-4e8d-acda-66d390b546ca
-### GET request to example server
-GET http://localhost:5000/rooms/{{item_uuid}}
+@place_name=warszawa
+
+### get ROOMS by PLACE_NAME
+GET http://localhost:5000/places/{{ place_name }}
+Accept: application/json
+Cache-Control: no-cache
+Content-Type: application/json
 
 
-### ADD NEW PLACE
+### get ROOM by URL_SLUG
+GET http://localhost:5000/rooms/url/pl/matrix
+Accept: application/json
+Cache-Control: no-cache
+Content-Type: application/json
+
+
+### add NEW_PLACE
 POST http://localhost:5000/places
 Accept: application/json
 Cache-Control: no-cache
@@ -33,13 +44,9 @@ Content-Type: application/json
   ]
 }
 
-### GET PLACES BY NAME
-GET http://localhost:5000/places/marki
-Accept: application/json
-Cache-Control: no-cache
-Content-Type: application/json
 
-### ADD NEW ROOM
+
+### add NEW_ROOM
 POST http://localhost:5000/rooms
 Accept: application/json
 Cache-Control: no-cache
@@ -66,16 +73,7 @@ Content-Type: application/json
 }
 
 
-
-
-
-### GET room by URL SLUG
-GET http://localhost:5000/rooms/url/pl/matrix
-Accept: application/json
-Cache-Control: no-cache
-Content-Type: application/json
-
-
+###
 
 //[
 //    {

@@ -1,4 +1,5 @@
-from typing import Annotated, Sequence
+from collections.abc import Sequence
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
@@ -24,7 +25,6 @@ class CityRepo(GenericRepo[City]):
 
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
-
 
     async def get_place_by_name(self, place_name: str, language: CountryAlpha2 | None = None):
         # Base query with join on the relationship

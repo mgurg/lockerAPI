@@ -28,6 +28,12 @@ To roll back the latest migration operation, you may use the `alembic downgrade`
 Revision History: Use `.venv/bin/alembic history` to see the history of migrations and understand the steps involved.
 Detailed View: Use `.venv/bin/alembic show <revision>` to get detailed information about specific revision scripts.
 
+## Update python dependencies
+
+```bash
+uv lock --upgrade
+```
+
 ## ADR
 
 http://localhost:5000/{language}/r/{room_name}

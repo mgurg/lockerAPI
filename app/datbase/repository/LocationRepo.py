@@ -1,12 +1,14 @@
-from typing import Annotated, Sequence
+from collections.abc import Sequence
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import select, BinaryExpression
+from pydantic_extra_types.country import CountryAlpha2
+from sqlalchemy import BinaryExpression, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.datbase.db import get_db
-from app.datbase.models.models import Location
+from app.datbase.models.models import Location, Room
 from app.datbase.repository.generics import GenericRepo
 
 UserDB = Annotated[AsyncSession, Depends(get_db)]
@@ -22,6 +24,19 @@ class LocationRepo(GenericRepo[Location]):
 
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
+
+    async def get_places_with_rooms(self, country: CountryAlpha2, cut_off: int =0) -> Sequence[Location]:
+        query = (
+            select(Location.city, Location.state_province, func.count(Room.id).label("room_count"))
+            .join(Room, Room.location_id == Location.id)
+            .where(Location.country == country)
+            .group_by(Location.city, Location.state_province)
+            .having(func.count(Room.id) > cut_off)
+            .order_by(func.count(Room.id).desc())
+        )
+
+        result = await self.session.execute(query)
+        return result.all()
 
     async def get_by_bbox(self, min_lng: float, max_lng: float, min_lat: float, max_lat: float,
                           load_relations: list[str | BinaryExpression] = None) -> Sequence[Location]:

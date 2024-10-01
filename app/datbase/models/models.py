@@ -1,7 +1,7 @@
 from typing import Optional
 
 import sqlalchemy as sa
-from sqlalchemy import Column, ForeignKey, Integer, Numeric, String, Table, func, Boolean
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, Numeric, String, Table, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

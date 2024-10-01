@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
+from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
 from starlette.status import HTTP_404_NOT_FOUND
 
@@ -32,16 +33,40 @@ class PlaceService:
         url_safe_place = RoomService.sanitize_input(place_name)
         city = await self.city_repo.get_place_by_name(url_safe_place)
         if city is None:
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Place `{place_name}` as: `{url_safe_place}` not found!")
+            raise HTTPException(
+                status_code=HTTP_404_NOT_FOUND,
+                detail=f"Place `{place_name}` as: `{url_safe_place}` not found!"
+            )
 
         print(city.lng_min, city.lng_max, city.lat_min, city.lat_max)
-        rooms = await self.room_repo.get_by_bbox(city.lng_min, city.lng_max, city.lat_min, city.lat_max, ["translations"])
+        rooms = await self.room_repo.get_by_bbox(
+            city.lng_min,
+            city.lng_max,
+            city.lat_min,
+            city.lat_max,
+            ["translations"]
+        )
 
         lang_code = "pl"
         for room in rooms:
             translation = next((t for t in room.translations if t.lang == lang_code.lower()), None)
             room.translation = translation if translation else None
         return rooms
+
+    async def get_places_with_rooms(self, country: CountryAlpha2):
+        places = await self.location_repo.get_places_with_rooms(country)
+
+        places_with_rooms_dict = [
+            {
+                "city": city,
+                "ascii_name" : RoomService.sanitize_input(city),
+                "state_province": state_province,
+                "room_count": room_count
+            }
+            for city, state_province, room_count in places
+        ]
+
+        return places_with_rooms_dict
 
     async def create_place(self, place: PlaceAdd):
         city_data = {

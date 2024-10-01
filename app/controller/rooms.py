@@ -27,12 +27,14 @@ async def room_by_url_slug(room_service: roomServiceDependency, language: Countr
 
     return db_item
 
+
 @room_router.get("/url/{language}/place/{location}")
 async def rooms_by_location(room_service: roomServiceDependency, language: CountryAlpha2, location: str):
     db_items = await room_service.get_room_by_location_and_language(location, language,
                                                                    ["city", "location", "translations"])
 
     return db_items
+
 
 @room_router.post("")
 async def add_room(room_service: roomServiceDependency, room: RoomAdd):
