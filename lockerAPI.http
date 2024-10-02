@@ -1,11 +1,17 @@
 @place_name=warszawa
+@ip=91.216.213.142
 
 ### get ROOMS by PLACE_NAME
-GET http://localhost:5000/places/{{ place_name }}
+GET http://localhost:5000/places/{{place_name}}
 Accept: application/json
 Cache-Control: no-cache
 Content-Type: application/json
 
+### get ROOMS by IP_GEOLOCATION
+GET http://localhost:5000/places/geoip
+Accept: application/json
+Cache-Control: no-cache
+Content-Type: application/json
 
 ### get ROOM by URL_SLUG
 GET http://localhost:5000/rooms/url/pl/matrix

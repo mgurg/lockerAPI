@@ -18,6 +18,9 @@ class Settings(BaseSettings):
         DB_NAME=os.getenv("DB_DATABASE"),
     )
 
+    # API KEYS
+    API_KEY_IPGEOLOCATION: str = os.getenv("API_KEY_IPGEOLOCATION")
+
     model_config = SettingsConfigDict(
         env_prefix="", env_file_encoding="utf-8", env_file=f"{APP_DIR}/.env", extra="allow"
     )

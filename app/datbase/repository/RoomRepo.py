@@ -3,7 +3,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import BinaryExpression, select
+from sqlalchemy import BinaryExpression, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -68,6 +68,26 @@ class RoomRepo(GenericRepo[Room]):
         query = (
             select(self.Model)
             .join(location_subquery, self.Model.location_id == location_subquery.c.id)
+        )
+
+        query = self._apply_relationship_loading(query, load_relations)
+        result = await self.session.execute(query)
+        return result.scalars().all()
+
+    async def get_nearby_rooms(self, lat: float, lon: float, load_relations: list[str | BinaryExpression] = None) -> \
+    Sequence[Room]:
+        # Haversine formula to calculate distance
+        query = (
+            select(self.Model)
+            .join(Location, self.Model.location_id == Location.id)
+            .where(
+                func.acos(
+                    func.sin(func.radians(lat)) * func.sin(func.radians(Location.lat)) +
+                    func.cos(func.radians(lat)) * func.cos(func.radians(Location.lat)) *
+                    func.cos(func.radians(Location.lng) - func.radians(lon))
+                ) * 6371 <= 400  # Distance in kilometers (10 km radius)
+            )
+            .limit(20)
         )
 
         query = self._apply_relationship_loading(query, load_relations)
