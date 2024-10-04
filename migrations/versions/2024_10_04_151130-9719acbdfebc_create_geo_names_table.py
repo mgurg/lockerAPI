@@ -1,19 +1,18 @@
-"""create geo_names table
+"""create_geo_names_table
 
-Revision ID: 76c6e1172d23
-Revises: 03f47dbcd7f3
-Create Date: 2024-09-10 12:20:52.722713
+Revision ID: 9719acbdfebc
+Revises: c3b31d2c21fe
+Create Date: 2024-10-04 15:11:30.930964
 
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = '76c6e1172d23'
-down_revision: Union[str, None] = '03f47dbcd7f3'
+revision: str = '9719acbdfebc'
+down_revision: Union[str, None] = 'c3b31d2c21fe'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

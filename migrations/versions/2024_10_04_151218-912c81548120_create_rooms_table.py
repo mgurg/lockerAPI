@@ -1,19 +1,19 @@
-"""create rooms table
+"""create_rooms_table
 
-Revision ID: ca1e37d10f89
-Revises: 76c6e1172d23
-Create Date: 2024-09-10 12:21:17.712885
+Revision ID: 912c81548120
+Revises: 16147e63828f
+Create Date: 2024-10-04 15:12:18.269921
 
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'ca1e37d10f89'
-down_revision: Union[str, None] = '76c6e1172d23'
+revision: str = '912c81548120'
+down_revision: Union[str, None] = '16147e63828f'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -26,6 +26,8 @@ def upgrade() -> None:
         sa.Column('url_slug', sa.String(), nullable=False),
         # sa.Column('city_id', sa.Integer(), nullable=False),
         sa.Column('location_id', sa.Integer(), nullable=True),
+        sa.Column('company_id', sa.Integer(), nullable=True),
+        sa.Column('department_id', sa.Integer(), nullable=True),
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('active', sa.Boolean(), nullable=False),
         sa.Column('players_min', sa.Integer(), nullable=True),
@@ -43,6 +45,8 @@ def upgrade() -> None:
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         # sa.ForeignKeyConstraint(['city_id'], ['cities.id'], ),
         sa.ForeignKeyConstraint(['location_id'], ['locations.id'], ),
+        sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ),
+        sa.ForeignKeyConstraint(['department_id'], ['departments.id'], ),
         sa.PrimaryKeyConstraint('id')
     )
 
