@@ -9,6 +9,7 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = 'fc1e91dfc44a'
@@ -22,18 +23,23 @@ def upgrade() -> None:
         'companies',
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
         sa.Column('uuid', sa.UUID(), nullable=False),
-        sa.Column('brand', sa.String(), nullable=False),
+        sa.Column('brand', sa.String(), nullable=True),
         sa.Column('name', sa.String(), nullable=False),
-        sa.Column('street_address', sa.String(), nullable=False),
-        sa.Column('city', sa.String(), nullable=False),
-        sa.Column('state_province', sa.String(), nullable=True),
-        sa.Column('postal_code', sa.String(), nullable=True),
-        sa.Column('country', sa.String(), nullable=False),
-        sa.Column('lat', sa.Numeric(10, 7), nullable=True),
-        sa.Column('lng', sa.Numeric(10, 7), nullable=True)
+        sa.Column('gov_id', sa.String(), nullable=True),
+        sa.Column('gov_id_type', sa.String(), nullable=True),
+        sa.Column('location_id', sa.Integer(), nullable=False),
+        sa.Column('website', sa.String(), nullable=True),
+        sa.Column('place_id', sa.String(), nullable=True),
+        sa.Column('phone', sa.String(), nullable=True),
+        sa.Column('email', sa.String(), nullable=True),
+        sa.Column('verified_at', postgresql.TIMESTAMP(timezone=True), nullable=True),
+        sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
+        sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
+        sa.ForeignKeyConstraint(['location_id'], ['locations.id'], ),
+        sa.UniqueConstraint('gov_id', 'gov_id_type', name='uq_gov_id_and_type'),
+        sa.PrimaryKeyConstraint('id')
     )
 
 
 def downgrade() -> None:
     op.drop_table('companies')
-

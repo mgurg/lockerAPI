@@ -25,7 +25,7 @@ class LocationRepo(GenericRepo[Location]):
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_places_with_rooms(self, country: CountryAlpha2, cut_off: int =0) -> Sequence[Location]:
+    async def get_places_with_rooms(self, country: CountryAlpha2, cut_off: int = 0) -> Sequence[Location]:
         query = (
             select(Location.city, Location.state_province, func.count(Room.id).label("room_count"))
             .join(Room, Room.location_id == Location.id)
@@ -38,7 +38,7 @@ class LocationRepo(GenericRepo[Location]):
         result = await self.session.execute(query)
         return result.all()
 
-    async def get_by_bbox(self, min_lng: float, max_lng: float, min_lat: float, max_lat: float,
+    async def get_by_bbox(self, min_lon: float, max_lon: float, min_lat: float, max_lat: float,
                           load_relations: list[str | BinaryExpression] = None) -> Sequence[Location]:
         # bbox = left,bottom,right,top
         # bbox = min Longitude , min Latitude , max Longitude , max Latitude
@@ -46,7 +46,7 @@ class LocationRepo(GenericRepo[Location]):
         query = (
             select(self.Model)
             .where(
-                (self.Model.lng >= min_lng) & (self.Model.lng <= max_lng),
+                (self.Model.lon >= min_lon) & (self.Model.lon <= max_lon),
                 (self.Model.lat >= min_lat) & (self.Model.lat <= max_lat)
             )
         )

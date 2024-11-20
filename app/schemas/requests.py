@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 from pydantic_extra_types.country import CountryAlpha2
@@ -12,8 +12,10 @@ class LocationAdd(BaseModel):
     state_province: str | None = None
     postal_code: str | None = None
     country: CountryAlpha2
+    located_in: str | None = None
+    type: Literal["company", "department", "room"] | None = None
     lat: float | None = None
-    lng: float | None = None
+    lon: float | None = None
 
 
 class TranslationAdd(BaseModel):
@@ -44,14 +46,26 @@ class GeoNameAdd(BaseModel):
 
 class PlaceAdd(BaseModel):
     lat: Annotated[Decimal | None, Field(max_digits=10, decimal_places=7)]
-    lng: Annotated[Decimal | None, Field(max_digits=10, decimal_places=7)]
+    lon: Annotated[Decimal | None, Field(max_digits=10, decimal_places=7)]
     lat_min: Annotated[Decimal | None, Field(max_digits=10, decimal_places=7)]  # South Latitude
     lat_max: Annotated[Decimal | None, Field(max_digits=10, decimal_places=7)]  # North Latitude
-    lng_min: Annotated[Decimal | None, Field(max_digits=10, decimal_places=7)]  # West Longitude
-    lng_max: Annotated[Decimal | None, Field(max_digits=10, decimal_places=7)]  # East Longitude
+    lon_min: Annotated[Decimal | None, Field(max_digits=10, decimal_places=7)]  # West Longitude
+    lon_max: Annotated[Decimal | None, Field(max_digits=10, decimal_places=7)]  # East Longitude
     population: int | None
     importance: float | None
     category: str
     region: str | None
     country: CountryAlpha2 | None
     geo_names: list[GeoNameAdd]
+
+
+class CompanyAdd(BaseModel):
+    name: str
+    brand: str | None = None
+    gov_id: str | None = None
+    gov_id_type: str | None = None
+    place_id: str | None = None
+    website: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    location: LocationAdd

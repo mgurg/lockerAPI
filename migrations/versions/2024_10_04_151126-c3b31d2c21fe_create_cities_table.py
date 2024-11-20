@@ -24,11 +24,11 @@ def upgrade() -> None:
         # sa.Column('local_id', sa.String(), nullable=True),
         # sa.Column('local_id_type', sa.String(), nullable=True),
         sa.Column('lat', sa.Numeric(precision=10, scale=7), nullable=True),
-        sa.Column('lng', sa.Numeric(precision=10, scale=7), nullable=True),
+        sa.Column('lon', sa.Numeric(precision=10, scale=7), nullable=True),
         sa.Column('lat_min', sa.Numeric(precision=10, scale=7), nullable=True),  # South Latitude
         sa.Column('lat_max', sa.Numeric(precision=10, scale=7), nullable=True),  # North Latitude
-        sa.Column('lng_min', sa.Numeric(precision=10, scale=7), nullable=True),  # West Longitude
-        sa.Column('lng_max', sa.Numeric(precision=10, scale=7), nullable=True),  # East Longitude
+        sa.Column('lon_min', sa.Numeric(precision=10, scale=7), nullable=True),  # West Longitude
+        sa.Column('lon_max', sa.Numeric(precision=10, scale=7), nullable=True),  # East Longitude
         sa.Column('population', sa.Integer(), nullable=True),
         sa.Column('importance', sa.Float(), nullable=True),
         sa.Column('category', sa.String(), nullable=False),

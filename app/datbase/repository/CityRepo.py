@@ -51,8 +51,8 @@ class CityRepo(GenericRepo[City]):
             .where(
                 (self.Model.lat_min <= latitude) &
                 (self.Model.lat_max >= latitude) &
-                (self.Model.lng_min <= longitude) &
-                (self.Model.lng_max >= longitude)
+                (self.Model.lon_min <= longitude) &
+                (self.Model.lon_max >= longitude)
             )
         )
 

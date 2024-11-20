@@ -27,27 +27,35 @@ Cache-Control: no-cache
 Content-Type: application/json
 
 {
-  "lat": 52.2296756,
-  "lng": 21.0122287,
-  "lat_min": 52.0296756,
-  "lat_max": 52.4296756,
-  "lng_min": 20.8122287,
-  "lng_max": 21.2122287,
-  "population": 1790658,
-  "importance": 1.0,
-  "category": "city",
-  "region": "mazowieckie",
-  "country": "pl",
+  "category": "town",
+  "country": "bg",
   "geo_names": [
     {
-      "name": "Warszawa",
-      "lang": "pl"
+      "lang": "bg",
+      "name": "Трън"
     },
     {
-      "name": "Warsaw",
-      "lang": "en"
+      "lang": "en",
+      "name": "Tran"
+    },
+    {
+      "lang": "hr",
+      "name": "Tran"
+    },
+    {
+      "lang": "ru",
+      "name": "Трын"
     }
-  ]
+  ],
+  "importance": 0.4637567626011294,
+  "lat": 42.8354054,
+  "lat_max": "42.8754054",
+  "lat_min": "42.7954054",
+  "lon": 22.6517667,
+  "lon_max": "22.6917667",
+  "lon_min": "22.6117667",
+  "population": "2443",
+  "region": "Перник"
 }
 
 
@@ -68,7 +76,7 @@ Content-Type: application/json
     "postal_code": "00-029",
     "country": "Poland",
     "lat": 52.229675,
-    "lng": 21.012230
+    "lon": 21.012230
   },
   "translation": {
     "lang": "pl",
@@ -99,7 +107,7 @@ Content-Type: application/json
 //        "active": true,
 //        "state": "open",
 //        "data_lat": "51.120145373471",
-//        "data_lng": "17.031662464142",
+//        "data_lon": "17.031662464142",
 //        "item_category": "room",
 //        "room_list_index": 0,
 //        "visited": 0,
@@ -107,7 +115,7 @@ Content-Type: application/json
 //        "id": "13761-uniwersytet-potworny",
 //        "url_desc": "http://www.trap-jungle.com",
 //        "lat": "51.120145373471",
-//        "lng": "17.031662464142",
+//        "lon": "17.031662464142",
 //        "phoneNo": "666378206(jeślinieodbieramyzostawwiadomośćSMS)",
 //        "youtube_videos": [],
 //        "isPartner": false,

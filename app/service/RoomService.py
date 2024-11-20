@@ -74,8 +74,8 @@ class RoomService:
         return db_item is not None
 
     async def create_room(self, room: RoomAdd) -> Room | None:
-        if room.location.lat and room.location.lng:
-            db_cities = await self.city_repo.get_places_by_bbox(room.location.lat, room.location.lng)
+        if room.location.lat and room.location.lon:
+            db_cities = await self.city_repo.get_places_by_bbox(room.location.lat, room.location.lon)
             for city in db_cities:
                 logger.info(f"Matching `{room.name}` with {city.id}")
         else:
@@ -93,7 +93,7 @@ class RoomService:
                 "postal_code": room.location.postal_code,
                 "country": room.location.country,
                 "lat": room.location.lat,
-                "lng": room.location.lng,
+                "lon": room.location.lon,
             }
             db_location = await self.location_repo.create(**location_data)
 

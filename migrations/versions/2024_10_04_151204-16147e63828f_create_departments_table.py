@@ -24,17 +24,12 @@ def upgrade() -> None:
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
         sa.Column('uuid', sa.UUID(), nullable=False),
         sa.Column('company_id', sa.Integer(), nullable=True),
-        sa.Column('brand', sa.String(), nullable=False),
+        sa.Column('location_id', sa.Integer(), nullable=True),
         sa.Column('name', sa.String(), nullable=False),
-        sa.Column('street_address', sa.String(), nullable=False),
-        sa.Column('city', sa.String(), nullable=False),
-        sa.Column('state_province', sa.String(), nullable=True),
-        sa.Column('postal_code', sa.String(), nullable=True),
-        sa.Column('country', sa.String(), nullable=False),
-        sa.Column('lat', sa.Numeric(10, 7), nullable=True),
-        sa.Column('lng', sa.Numeric(10, 7), nullable=True),
+
 
         sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ),
+        sa.ForeignKeyConstraint(['location_id'], ['locations.id'], ),
         sa.PrimaryKeyConstraint('id')
     )
 

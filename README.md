@@ -37,11 +37,19 @@ Detailed View: Use `.venv/bin/alembic show <revision>` to get detailed informati
 ```bash
 uv lock --upgrade
 ```
+### Check & format project
+```bash
+ruff check app/
+```
+
+```bash
+ruff check app/ --fix
+```
 
 ## Cold start
 
 - alembic migration
-- insert geo data
+- insert geo data `uv run locations.py`
 -
 
 ## ADR

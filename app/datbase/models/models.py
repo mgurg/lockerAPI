@@ -37,10 +37,14 @@ class Location(BaseModel):
     state_province: Mapped[str | None]
     postal_code: Mapped[str | None]
     country: Mapped[str]
+    located_in: Mapped[str | None]
+    type: Mapped[str | None]
     lat: Mapped[float | None] = mapped_column(Numeric(10, 7))
-    lng: Mapped[float | None] = mapped_column(Numeric(10, 7))
+    lon: Mapped[float | None] = mapped_column(Numeric(10, 7))
 
     rooms: Mapped[list["Room"]] = relationship(back_populates="location")
+    companies: Mapped[list["Company"]] = relationship(back_populates="location")
+    departments: Mapped[list["Department"]] = relationship(back_populates="location")
 
 
 class City(BaseModel):
@@ -48,11 +52,11 @@ class City(BaseModel):
     # local_id: Mapped[str]
     # local_id_type: Mapped[str]
     lat: Mapped[float | None] = mapped_column(Numeric(10, 7))
-    lng: Mapped[float | None] = mapped_column(Numeric(10, 7))
+    lon: Mapped[float | None] = mapped_column(Numeric(10, 7))
     lat_min: Mapped[float | None] = mapped_column(Numeric(10, 7))
-    lng_min: Mapped[float | None] = mapped_column(Numeric(10, 7))
+    lon_min: Mapped[float | None] = mapped_column(Numeric(10, 7))
     lat_max: Mapped[float | None] = mapped_column(Numeric(10, 7))
-    lng_max: Mapped[float | None] = mapped_column(Numeric(10, 7))
+    lon_max: Mapped[float | None] = mapped_column(Numeric(10, 7))
     population: Mapped[int | None]
     importance: Mapped[float | None]
     category: Mapped[str] = mapped_column(String(16))
@@ -122,7 +126,6 @@ class Language(Base):
 class RoomTranslation(BaseModel):
     __tablename__ = "room_translations"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
     room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
     lang: Mapped[str] = mapped_column(String(2))
     title: Mapped[str] = mapped_column(String(128))
@@ -131,3 +134,50 @@ class RoomTranslation(BaseModel):
     is_ai: Mapped[bool | None] = mapped_column(Boolean)
 
     room: Mapped["Room"] = relationship(back_populates="translations")
+
+
+class Company(BaseModel):
+    __tablename__ = "companies"
+
+    uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True))
+    brand: Mapped[str | None] = mapped_column(String())
+    name: Mapped[str] = mapped_column(String())
+    gov_id: Mapped[str | None] = mapped_column(String())
+    gov_id_type: Mapped[str | None] = mapped_column(String())
+    location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"))
+    place_id: Mapped[str | None] = mapped_column(String())
+    website: Mapped[str | None] = mapped_column(String())
+    phone: Mapped[str | None] = mapped_column(String())
+    email: Mapped[str | None] = mapped_column(String())
+    verified_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+
+    # street_address: Mapped[str | None] = mapped_column(String())
+    # city: Mapped[str | None] = mapped_column(String())
+    # postal_code: Mapped[str | None] = mapped_column(String())
+    # country: Mapped[str | None] = mapped_column(String())
+    # lat: Mapped[float | None] = mapped_column(Numeric(10, 7))
+    # lon: Mapped[float | None] = mapped_column(Numeric(10, 7))
+
+    location: Mapped[Optional["Location"]] = relationship(back_populates="companies")
+    departments: Mapped[list["Department"]] = relationship(back_populates="company")
+
+
+class Department(BaseModel):
+    __tablename__ = "departments"
+
+    uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True))
+    name: Mapped[str] = mapped_column(String())
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
+    location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"))
+    # brand: Mapped[str] = mapped_column(String())
+    # street_address: Mapped[str | None] = mapped_column(String())
+    # city: Mapped[str | None] = mapped_column(String())
+    # postal_code: Mapped[str | None] = mapped_column(String())
+    # country: Mapped[str | None] = mapped_column(String())
+    # lat: Mapped[float | None] = mapped_column(Numeric(10, 7))
+    # lon: Mapped[float | None] = mapped_column(Numeric(10, 7))
+
+    company: Mapped["Company"] = relationship(back_populates="departments")
+    location: Mapped["Location"] = relationship(back_populates="departments")

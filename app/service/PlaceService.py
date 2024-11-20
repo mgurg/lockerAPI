@@ -42,10 +42,10 @@ class PlaceService:
                 detail=f"Place `{place_name}` as: `{url_safe_place}` not found!"
             )
 
-        print(city.lng_min, city.lng_max, city.lat_min, city.lat_max)
+        print(city.lon_min, city.lon_max, city.lat_min, city.lat_max)
         rooms = await self.room_repo.get_by_bbox(
-            city.lng_min,
-            city.lng_max,
+            city.lon_min,
+            city.lon_max,
             city.lat_min,
             city.lat_max,
             ["translations"]
@@ -65,8 +65,8 @@ class PlaceService:
         #     geo_data =  response.json()
         print(ip)
 
-        latitude = float('50.24230')
-        longitude = float('19.13851')
+        latitude = float("50.24230")
+        longitude = float("19.13851")
 
         rooms = await self.room_repo.get_nearby_rooms(latitude, longitude, ["translations"])
 
@@ -94,11 +94,11 @@ class PlaceService:
     async def create_place(self, place: PlaceAdd):
         city_data = {
             "lat": place.lat,
-            "lng": place.lng,
+            "lon": place.lon,
             "lat_min": place.lat_min,
             "lat_max": place.lat_max,
-            "lng_min": place.lng_min,
-            "lng_max": place.lng_max,
+            "lon_min": place.lon_min,
+            "lon_max": place.lon_max,
             "population": place.population,
             "importance": place.importance,
             "category": place.category,

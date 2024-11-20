@@ -3,7 +3,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import BinaryExpression, select, func
+from sqlalchemy import BinaryExpression, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -51,7 +51,7 @@ class RoomRepo(GenericRepo[Room]):
 
         ...
 
-    async def get_by_bbox(self, min_lng: float, max_lng: float, min_lat: float, max_lat: float,
+    async def get_by_bbox(self, min_lon: float, max_lon: float, min_lat: float, max_lat: float,
                           load_relations: list[str | BinaryExpression] = None) -> Sequence[Room]:
         # bbox = left,bottom,right,top
         # bbox = min Longitude , min Latitude , max Longitude , max Latitude
@@ -59,7 +59,7 @@ class RoomRepo(GenericRepo[Room]):
         location_subquery = (
             select(Location.id)
             .where(
-                (Location.lng >= min_lng) & (Location.lng <= max_lng),
+                (Location.lon >= min_lon) & (Location.lon <= max_lon),
                 (Location.lat >= min_lat) & (Location.lat <= max_lat)
             ).subquery()
         )
@@ -84,7 +84,7 @@ class RoomRepo(GenericRepo[Room]):
                 func.acos(
                     func.sin(func.radians(lat)) * func.sin(func.radians(Location.lat)) +
                     func.cos(func.radians(lat)) * func.cos(func.radians(Location.lat)) *
-                    func.cos(func.radians(Location.lng) - func.radians(lon))
+                    func.cos(func.radians(Location.lon) - func.radians(lon))
                 ) * 6371 <= 400  # Distance in kilometers (10 km radius)
             )
             .limit(20)

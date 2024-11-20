@@ -26,8 +26,10 @@ def upgrade():
         sa.Column('state_province', sa.String(), nullable=True),
         sa.Column('postal_code', sa.String(), nullable=True),
         sa.Column('country', sa.String(), nullable=False),
+        sa.Column('located_in', sa.String(), nullable=True), # mall center
+        sa.Column('type', sa.String(), nullable=False), # Room / Department/ Company
         sa.Column('lat', sa.Numeric(10, 7), nullable=True),
-        sa.Column('lng', sa.Numeric(10, 7), nullable=True)
+        sa.Column('lon', sa.Numeric(10, 7), nullable=True)
     )
 
 
