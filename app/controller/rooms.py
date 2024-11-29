@@ -36,6 +36,13 @@ async def rooms_by_location(room_service: roomServiceDependency, language: Count
     return db_items
 
 
+@room_router.post("/department")
+async def add_room(room_service: roomServiceDependency, room: RoomAdd):
+    db_item = await room_service.create_room(room)
+
+    return db_item
+
+
 @room_router.post("")
 async def add_room(room_service: roomServiceDependency, room: RoomAdd):
     db_item = await room_service.create_room(room)

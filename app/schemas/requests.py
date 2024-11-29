@@ -1,5 +1,6 @@
 from decimal import Decimal
 from typing import Annotated, Literal
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 from pydantic_extra_types.country import CountryAlpha2
@@ -27,7 +28,8 @@ class TranslationAdd(BaseModel):
 
 class RoomAdd(BaseModel):
     name: str
-    # city_id: int
+    company_uuid: UUID
+    department_uuid: UUID | None = None
     price_from: float | None = None
     game_duration: int | None = None
     players_min: int | None = None
@@ -69,3 +71,9 @@ class CompanyAdd(BaseModel):
     email: str | None = None
     phone: str | None = None
     location: LocationAdd
+
+
+class DepartmentAdd(BaseModel):
+    company_uuid: UUID | None = None
+    location: LocationAdd
+    name: str

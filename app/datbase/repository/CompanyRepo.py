@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import Depends
 from sqlalchemy import Sequence, func, select, text
@@ -15,6 +16,12 @@ class CompanyRepo(GenericRepo[Company]):
     def __init__(self, session: UserDB) -> None:
         self.Model = Company
         super().__init__(session, self.Model)
+
+    async def get_by_uuid(self, uuid: UUID) -> Company | None:
+        query = select(self.Model).where(self.Model.uuid == str(uuid))
+
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
 
     async def get_companies(
         self, offset: int, limit: int, sort_column: str, sort_order: str, search: str | None = None

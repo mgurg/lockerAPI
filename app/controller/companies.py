@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from starlette.status import HTTP_204_NO_CONTENT
 
 from app.datbase.models.responses import CompaniesPaginated
-from app.schemas.requests import CompanyAdd
+from app.schemas.requests import CompanyAdd, DepartmentAdd
 from app.service.CompanyService import CompanyService
 
 company_router = APIRouter()
@@ -29,3 +29,10 @@ async def get_companies(
 async def add_company(company_service: companyServiceDependency, company: CompanyAdd):
     await company_service.create_company(company)
     return None
+
+
+@company_router.post("/department")
+async def add_room(company_service: companyServiceDependency, department: DepartmentAdd):
+    db_item = await company_service.create_department(department)
+
+    return db_item
