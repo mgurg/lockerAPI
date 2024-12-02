@@ -22,10 +22,10 @@ def upgrade() -> None:
         'geo_names',
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
         sa.Column('city_id', sa.Integer(), nullable=False),
-        sa.Column('name', sa.String(), nullable=False),
-        sa.Column('name_ascii', sa.String(), nullable=False),
-        sa.Column('country', sa.String(), nullable=False),
-        sa.Column('lang', sa.String(), nullable=False),
+        sa.Column('name', sa.TEXT(), nullable=False),
+        sa.Column('name_ascii', sa.TEXT(), nullable=False),
+        sa.Column('country', sa.TEXT(), nullable=False),
+        sa.Column('lang', sa.TEXT(), nullable=False),
         sa.ForeignKeyConstraint(['city_id'], ['cities.id'], ),
     )
 

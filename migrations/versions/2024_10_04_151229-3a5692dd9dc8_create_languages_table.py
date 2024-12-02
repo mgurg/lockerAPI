@@ -22,8 +22,8 @@ def upgrade() -> None:
     op.create_table(
         'languages',
         sa.Column('id', sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
-        sa.Column('name', sa.String(), nullable=False),
-        sa.Column('code', sa.String(), nullable=False)
+        sa.Column('name', sa.TEXT(), nullable=False),
+        sa.Column('code', sa.TEXT(), nullable=False)
     )
 
 

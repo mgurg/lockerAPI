@@ -21,13 +21,13 @@ def upgrade():
     op.create_table(
         'locations',
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
-        sa.Column('street_address', sa.String(), nullable=False),
-        sa.Column('city', sa.String(), nullable=False),
-        sa.Column('state_province', sa.String(), nullable=True),
-        sa.Column('postal_code', sa.String(), nullable=True),
-        sa.Column('country', sa.String(), nullable=False),
-        sa.Column('located_in', sa.String(), nullable=True), # mall center
-        sa.Column('type', sa.String(), nullable=False), # Room / Department/ Company
+        sa.Column('street_address', sa.TEXT(), nullable=False),
+        sa.Column('city', sa.TEXT(), nullable=False),
+        sa.Column('state_province', sa.TEXT(), nullable=True),
+        sa.Column('postal_code', sa.TEXT(), nullable=True),
+        sa.Column('country', sa.TEXT(), nullable=False),
+        sa.Column('located_in', sa.TEXT(), nullable=True), # mall center
+        sa.Column('type', sa.TEXT(), nullable=False), # Room / Department/ Company
         sa.Column('lat', sa.Numeric(10, 7), nullable=True),
         sa.Column('lon', sa.Numeric(10, 7), nullable=True)
     )

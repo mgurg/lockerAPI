@@ -25,7 +25,7 @@ def upgrade() -> None:
         sa.Column('uuid', sa.UUID(), nullable=False),
         sa.Column('company_id', sa.Integer(), nullable=True),
         sa.Column('location_id', sa.Integer(), nullable=True),
-        sa.Column('name', sa.String(), nullable=False),
+        sa.Column('name', sa.TEXT(), nullable=False),
 
 
         sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ),

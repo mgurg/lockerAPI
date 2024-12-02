@@ -21,8 +21,8 @@ def upgrade() -> None:
     op.create_table(
         'cities',
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
-        # sa.Column('local_id', sa.String(), nullable=True),
-        # sa.Column('local_id_type', sa.String(), nullable=True),
+        # sa.Column('local_id', sa.TEXT(), nullable=True),
+        # sa.Column('local_id_type', sa.TEXT(), nullable=True),
         sa.Column('lat', sa.Numeric(precision=10, scale=7), nullable=True),
         sa.Column('lon', sa.Numeric(precision=10, scale=7), nullable=True),
         sa.Column('lat_min', sa.Numeric(precision=10, scale=7), nullable=True),  # South Latitude
@@ -31,11 +31,11 @@ def upgrade() -> None:
         sa.Column('lon_max', sa.Numeric(precision=10, scale=7), nullable=True),  # East Longitude
         sa.Column('population', sa.Integer(), nullable=True),
         sa.Column('importance', sa.Float(), nullable=True),
-        sa.Column('category', sa.String(), nullable=False),
-        sa.Column('region', sa.String(), nullable=True),
-        sa.Column('country', sa.String(), nullable=True),
-        sa.Column('seo_title', sa.String(), nullable=True),
-        sa.Column('seo_description', sa.String(), nullable=True),
+        sa.Column('category', sa.TEXT(), nullable=False),
+        sa.Column('region', sa.TEXT(), nullable=True),
+        sa.Column('country', sa.TEXT(), nullable=True),
+        sa.Column('seo_title', sa.TEXT(), nullable=True),
+        sa.Column('seo_description', sa.TEXT(), nullable=True),
     )
 
 
