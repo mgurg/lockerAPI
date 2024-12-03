@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
 from app.controller.companies import company_router
+from app.controller.games import game_router
 from app.controller.places import place_router
 from app.controller.rooms import room_router
 
@@ -34,6 +35,7 @@ def create_application() -> FastAPI:
     app.include_router(room_router, prefix="/rooms", tags=["ROOM"])
     app.include_router(place_router, prefix="/places", tags=["PLACE"])
     app.include_router(company_router, prefix="/companies", tags=["COMPANY"])
+    app.include_router(game_router, prefix="/games", tags=["GAMES"])
 
     return app
 

@@ -29,6 +29,11 @@ To roll back the latest migration operation, you may use the `alembic downgrade`
 docker exec -it lockerapi-web .venv/bin/alembic alembic downgrade -1
 ```
 
+To run rolled back migration again: 
+```bash
+docker exec -it lockerapi-web .venv/bin/alembic alembic downgrade +1
+```
+
 Revision History: Use `.venv/bin/alembic history` to see the history of migrations and understand the steps involved.
 Detailed View: Use `.venv/bin/alembic show <revision>` to get detailed information about specific revision scripts.
 

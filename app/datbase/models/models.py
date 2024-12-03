@@ -181,3 +181,29 @@ class Department(BaseModel):
 
     company: Mapped["Company"] = relationship(back_populates="departments")
     location: Mapped["Location"] = relationship(back_populates="departments")
+
+
+class AiGame(BaseModel):
+    __tablename__ = "ai_games"
+
+    uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True))
+    theme: Mapped[str] = mapped_column(String(), nullable=False)
+    description: Mapped[str] = mapped_column(String(), nullable=False)
+    difficulty: Mapped[str] = mapped_column(String(), nullable=False)
+    category: Mapped[str] = mapped_column(String(), nullable=False)
+    occasion: Mapped[str] = mapped_column(String(), nullable=False)
+    email: Mapped[str] = mapped_column(String())
+    token: Mapped[str] = mapped_column(String(), nullable=False)
+    intro: Mapped[str] = mapped_column(String(), nullable=False)
+    ending: Mapped[str] = mapped_column(String(), nullable=False)
+    puzzle_1: Mapped[str | None] = mapped_column(String(), nullable=True)
+    puzzle_2: Mapped[str | None] = mapped_column(String(), nullable=True)
+    puzzle_3: Mapped[str | None] = mapped_column(String(), nullable=True)
+    puzzle_4: Mapped[str | None] = mapped_column(String(), nullable=True)
+    state: Mapped[str] = mapped_column(String())
+    current_puzzle: Mapped[int] = mapped_column(Integer())
+    hints_remaining: Mapped[int] = mapped_column(Integer())
+    wrong_answers: Mapped[int] = mapped_column(Integer())
+    rating: Mapped[int | None] = mapped_column(Integer())
+    remarks: Mapped[str | None] = mapped_column(String())
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now())

@@ -7,11 +7,9 @@ Create Date: 2024-11-29 13:24:38.980839
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
-
-
 
 # revision identifiers, used by Alembic.
 revision: str = '78ac4824b45d'
@@ -32,8 +30,8 @@ def upgrade() -> None:
         sa.Column('occasion', sa.TEXT(), nullable=False),
         sa.Column('email', sa.TEXT(), nullable=True),
         sa.Column('token', sa.TEXT(), nullable=False),
-        sa.Column('ai_intro', sa.TEXT(), nullable=False),
-        sa.Column('ai_puzzles', sa.TEXT(), nullable=False),
+        sa.Column('intro', sa.TEXT(), nullable=False),
+        sa.Column('ending', sa.TEXT()),
         sa.Column('puzzle_1', sa.TEXT()),
         sa.Column('puzzle_2', sa.TEXT()),
         sa.Column('puzzle_3', sa.TEXT()),
@@ -41,6 +39,7 @@ def upgrade() -> None:
         sa.Column('state', sa.TEXT(), nullable=False),
         sa.Column('current_puzzle', sa.Integer(), nullable=False),
         sa.Column('hints_remaining', sa.Integer(), nullable=False),
+        sa.Column('wrong_answers', sa.Integer(), nullable=False),
         sa.Column('rating', sa.Integer(), nullable=False),
         sa.Column('remarks', sa.TEXT()),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
