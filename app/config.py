@@ -12,10 +12,11 @@ class Settings(BaseSettings):
     PROJECT_DIR: os.PathLike[str] = Path(__file__).parent.parent
     ENVIRONMENT: str | None = os.getenv("APP_ENV", None)
 
-    DB_POSTGRES_URL: PostgresDsn = "postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DB_NAME}".format(
+    DB_POSTGRES_URL: PostgresDsn = "postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}".format(
         DB_USER=os.getenv("DB_USERNAME"),
         DB_PASSWORD=os.getenv("DB_PASSWORD"),
         DB_HOST=os.getenv("DB_HOST"),
+        DB_PORT=os.getenv("DB_PORT"),
         DB_NAME=os.getenv("DB_DATABASE"),
     )
 
