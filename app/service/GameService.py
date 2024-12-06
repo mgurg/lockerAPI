@@ -138,10 +138,11 @@ class GameService:
         prev_puzzles_text = ",  ".join(
             f"{i + 1}: `{item}`" for i, item in enumerate(prev_puzzles_desc) if item is not None)
 
-        puzzle_prompt = f"""Generate escape room text puzzle number {puzzle_counter} for theme {db_game.theme} and
-         description {db_game.description}, don't repeat those information, you are during a game so you now them from
-          previous intro. There should be 3 options available, and only one correct. `wrong_feedback`
-           numbers should correspond to `options` numbers Don't repeat previous riddles ideas
+        puzzle_prompt = f"""Generate text puzzle number {puzzle_counter} of 4 for theme {db_game.theme} and
+         description {db_game.description}, don't repeat those information. Scenario should return some subtle, useful
+          tips to help solve riddles . There should be 3 options (answers) available,
+          and only one correct. `wrong_feedback` numbers should correspond to `options` numbers.
+          Don't repeat previous riddles ideas, create unique and various questions each time:
         {prev_puzzles_text}"""
         puzzle_response: PuzzleResponse = await self.get_ai_response(puzzle_prompt, PuzzleResponse)
         if not puzzle_response:
@@ -212,10 +213,9 @@ class GameService:
             f"{i + 1}: `{item}`" for i, item in enumerate(prev_puzzles_desc) if item is not None)
 
         ending_prompt = f"""Generate an ending based on initial intro: `{db_game.intro}` and
-         progress: {prev_puzzles_text} keep it below 300 chars"""
+         progress: {prev_puzzles_text} keep it below 300 chars. It should contains unexpected twist"""
         ending = await self.get_ai_response(ending_prompt, GameOutro)
 
-        print(ending)
         return ending
 
     async def review(self, game_uuid: UUID, review: ReviewRequest) -> None:
