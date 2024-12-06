@@ -50,4 +50,4 @@ app = create_application()
 
 @app.get("/")
 async def read_root():
-    return {"Hello": "World!", "env": settings.ENVIRONMENT, "time": datetime.now(UTC)}
+    return {"Hello": "World!", "env": settings.ENVIRONMENT, "time": datetime.now(UTC), "appUrl": settings.APP_URL }
