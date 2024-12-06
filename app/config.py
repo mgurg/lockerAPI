@@ -10,6 +10,7 @@ APP_DIR = Path(__file__).parent.parent / "app"
 
 class Settings(BaseSettings):
     PROJECT_DIR: os.PathLike[str] = Path(__file__).parent.parent
+    ENVIRONMENT: str | None = os.getenv("APP_ENV", None)
 
     DB_POSTGRES_URL: PostgresDsn = "postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DB_NAME}".format(
         DB_USER=os.getenv("DB_USERNAME"),

@@ -4,10 +4,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
+from app.config import get_settings
 from app.controller.companies import company_router
 from app.controller.games import game_router
 from app.controller.places import place_router
 from app.controller.rooms import room_router
+
+settings = get_settings()
 
 logger.add("logs/locker_api.log", format="{time} {level} {message}", level="INFO", backtrace=False, diagnose=False)
 logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
@@ -45,4 +48,4 @@ app = create_application()
 
 @app.get("/")
 async def read_root():
-    return {"Hello": "World!"}
+    return {"Hello": "World!", "env": settings.ENVIRONMENT}
