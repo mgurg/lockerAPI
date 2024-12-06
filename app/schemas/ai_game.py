@@ -54,7 +54,7 @@ class GameState(BaseModel):
     wrong_answers: int
     moves: int
     hints_remaining: int
-    game_state: str
+    state: str
     story: str
     puzzle_descriptions: list[str]
     puzzle_history: list[str]

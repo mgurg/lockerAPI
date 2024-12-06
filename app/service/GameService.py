@@ -185,7 +185,7 @@ class GameService:
             wrong_answers = db_game.wrong_answers + 1
             await self.ai_game_repo.update(db_game.id, **{"wrong_answers": wrong_answers})
             if wrong_answers >= 5:
-                await self.ai_game_repo.update(db_game.id, **{"wrong_answers": wrong_answers, "game_state": "trapped"})
+                await self.ai_game_repo.update(db_game.id, **{"wrong_answers": wrong_answers, "state": "trapped"})
                 return {"result": "You are trapped!", "correct": False}
 
             # Access feedback directly from the dictionaries
