@@ -17,7 +17,7 @@ settings = get_settings()
 logger.add("logs/locker_api.log", format="{time} {level} {message}", level="INFO", backtrace=False, diagnose=False)
 logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
 
-origins: list[AnyHttpUrl] = ["http://localhost:3000", settings.APP_URL]
+origins: list[str] = ["http://localhost:3000", settings.APP_URL]
 
 
 def create_application() -> FastAPI:
