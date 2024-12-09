@@ -1,7 +1,8 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header
+from starlette.requests import Request
 from starlette.status import HTTP_204_NO_CONTENT
 
 from app.datbase.bearer_auth import is_app_owner
@@ -29,8 +30,10 @@ async def start_game(game_service: gameServiceDependency, setup: GameStart,
 
 
 @game_router.get("/intro/{game_uuid}")
-async def get_intro(game_service: gameServiceDependency, game_uuid: UUID, auth=Depends(is_app_owner)) -> IntroResponse:
-    return await game_service.intro(game_uuid)
+async def get_intro(game_service: gameServiceDependency, game_uuid: UUID, request: Request,
+                    x_forwarded_for: str = Header(None), auth=Depends(is_app_owner)) -> IntroResponse:
+    client_ip = x_forwarded_for.split(",")[0].strip() if x_forwarded_for else request.client.host
+    return await game_service.intro(game_uuid, client_ip)
 
 
 @game_router.get("/puzzle/{game_uuid}")

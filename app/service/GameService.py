@@ -5,10 +5,11 @@ from time import perf_counter
 from typing import Annotated
 from uuid import UUID, uuid4
 
+import httpx
 from fastapi import Depends, HTTPException
 from loguru import logger
 from openai import AsyncOpenAI
-from pydantic import BaseModel
+from pydantic import BaseModel, IPvAnyAddress
 
 from app.config import get_settings
 from app.datbase.repository.AiGameRepo import AiGameRepo
@@ -94,11 +95,34 @@ class GameService:
         db_ai_game = await self.ai_game_repo.create(**init_game_data)
         return db_ai_game
 
-    async def intro(self, game_uuid: UUID):
+    async def fetch_geolocation(self, ip):
+        if ip is not None:
+            url = f"https://api.ipgeolocation.io/ipgeo?apiKey={settings.API_KEY_IPGEOLOCATION}&ip={ip}"
+            location = None
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(url)
+                    response.raise_for_status()  # Raise an error for HTTP errors
+                    geo_data = response.json()
+                    location = f"{geo_data['country_code3']}, {geo_data['city']}"
+            except (httpx.RequestError, httpx.HTTPStatusError) as e:
+                print(f"Error fetching geolocation for IP {ip}: {e}")
+            except KeyError as e:
+                print(f"Unexpected response structure for IP {ip}: Missing key {e}")
+            except Exception as e:
+                print(f"An unexpected error occurred for IP {ip}: {e}")
+
+            return location
+
+    async def intro(self, game_uuid: UUID, ip: IPvAnyAddress):
         db_game = await self.ai_game_repo.get_by_uuid(game_uuid)
         if not db_game or db_game.state != "new":
             raise HTTPException(status_code=404, detail="Game not found.")
 
+        if db_game.ip is None and ip is not None:
+            location = await self.fetch_geolocation(ip)
+            logger.info(f"IP: {ip}, Location: {location}")
+            # await self.ai_game_repo.update(db_game.id, **{"ip": ip, "location":location})
         return db_game
 
     async def generate_puzzle(self, game_uuid: UUID):
@@ -139,8 +163,8 @@ class GameService:
             f"{i + 1}: `{item}`" for i, item in enumerate(prev_puzzles_desc) if item is not None)
 
         puzzle_prompt = f"""Generate text puzzle number {puzzle_counter} of 4 for theme {db_game.theme} and
-         description {db_game.description}, don't repeat those information. Scenario should return some subtle, useful
-          tips to help solve riddles . There should be 3 options (answers) available,
+         description {db_game.description}, don't repeat those information in scenario. Scenario should return some subtle, useful
+          tips to help solve riddles. There should be 3 options (answers) available,
           and only one correct. `wrong_feedback` numbers should correspond to `options` numbers.
           Don't repeat previous riddles ideas, create unique and various questions each time:
         {prev_puzzles_text}"""

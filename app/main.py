@@ -1,10 +1,9 @@
 import sys
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
-from pydantic import AnyHttpUrl
 
 from app.config import get_settings
 from app.controller.companies import company_router
@@ -50,4 +49,4 @@ app = create_application()
 
 @app.get("/")
 async def read_root():
-    return {"Hello": "World!", "env": settings.ENVIRONMENT, "time": datetime.now(UTC), "appUrl": settings.APP_URL }
+    return {"Hello": "World!", "env": settings.ENVIRONMENT, "time": datetime.now(UTC), "appUrl": settings.APP_URL}
