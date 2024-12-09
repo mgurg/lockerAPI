@@ -104,7 +104,7 @@ class GameService:
                     response = await client.get(url)
                     response.raise_for_status()  # Raise an error for HTTP errors
                     geo_data = response.json()
-                    location = f"{geo_data['country_code3']}, {geo_data['city']}"
+                    location = f"{geo_data['country_code2']}, {geo_data['city']}"
             except (httpx.RequestError, httpx.HTTPStatusError) as e:
                 print(f"Error fetching geolocation for IP {ip}: {e}")
             except KeyError as e:
@@ -122,7 +122,7 @@ class GameService:
         if db_game.ip is None and ip is not None:
             location = await self.fetch_geolocation(ip)
             logger.info(f"IP: {ip}, Location: {location}")
-            # await self.ai_game_repo.update(db_game.id, **{"ip": ip, "location":location})
+            await self.ai_game_repo.update(db_game.id, **{"ip": ip, "location":location})
         return db_game
 
     async def generate_puzzle(self, game_uuid: UUID):
