@@ -46,6 +46,7 @@ def upgrade() -> None:
         sa.Column('wrong_answers', sa.Integer(), nullable=False),
         sa.Column('rating', sa.Integer(), nullable=False),
         sa.Column('remarks', sa.TEXT()),
+        sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
     )
     op.create_index('idx_uuid', 'ai_games', ['uuid'])

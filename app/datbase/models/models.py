@@ -1,7 +1,7 @@
 from typing import Optional
 
 import sqlalchemy as sa
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, Numeric, String, Table, func
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Numeric, String, Table, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -209,4 +209,5 @@ class AiGame(BaseModel):
     wrong_answers: Mapped[int] = mapped_column(Integer())
     rating: Mapped[int | None] = mapped_column(Integer())
     remarks: Mapped[str | None] = mapped_column(String())
-    created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+    updated_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
+    created_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now())

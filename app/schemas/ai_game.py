@@ -40,7 +40,6 @@ class GenericList(BaseModel):
 
 class GameIntro(BaseModel):
     intro: str
-    # puzzles: list[PuzzleResponse]
 
 
 class GameOutro(BaseModel):
