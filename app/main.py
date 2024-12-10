@@ -13,8 +13,8 @@ from app.controller.rooms import room_router
 
 settings = get_settings()
 
-logger.add("logs/locker_api.log", format="{time} {level} {message}", level="INFO", backtrace=False, diagnose=False)
-logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
+logger.add("logs/locker_api.log", format="{time} {level} {message}", level=settings.LOG_LEVEL, backtrace=False, diagnose=False)
+logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level=settings.LOG_LEVEL)
 
 origins: list[str] = ["http://localhost:3000", settings.APP_URL]
 
