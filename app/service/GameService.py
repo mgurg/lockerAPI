@@ -31,7 +31,7 @@ class GameService:
             client = AsyncOpenAI(api_key=settings.API_KEY_OPENAI)
             system_msg = """You are a creative escape room game master. Maintain story continuity and create engaging
              puzzles that connect logically to previous events. Each puzzle should base on facts or real persons histories
-             but with different mechanics. Response in Polish language"""
+             but with different mechanics. Response only in Polish language"""
             response = await client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -50,13 +50,18 @@ class GameService:
             )
 
             function_args = response.choices[0].message.function_call.arguments
+            usage = response.usage
+            prompt_tokens = usage.prompt_tokens
+            completion_tokens = usage.completion_tokens
+            total_tokens = usage.total_tokens
+
+            logger.info(f"Tokens prompt: `{prompt_tokens}`, completion: `{completion_tokens}`, total: `{total_tokens}`")
             return response_model.model_validate_json(function_args)
         except Exception as e:
             if "401" in str(e):
-                print("Error: Unauthorized. Please verify that your API key is correct.")
-                print("Visit https://platform.openai.com/account/api-keys to obtain a valid key.")
+                logger.error("Error: Unauthorized. Visit https://platform.openai.com/account/api-keys and verify that your API key is correct.")
             else:
-                print(f"An unexpected error occurred with the OpenAI API: {e}")
+                logger.error(f"An unexpected error occurred with the OpenAI API: {e}")
             return None
         finally:
             end_time = perf_counter()  # Stop high-resolution timer
@@ -66,9 +71,18 @@ class GameService:
     async def start(self, setup: GameStart):
 
         ai_response: GameIntro = await self.get_ai_response(
-            f"""Generate game introduction theme: {setup.theme}, details: {setup.description}, don't put riddles
-             into response, try don't exceed 500 chars""",
+            f"""
+            Generate escape room game introduction based on information provided in Polish language.
+             - theme: '{setup.theme}',
+             - details: '{setup.description}',
+             - difficulty: '{setup.difficulty}',
+             - category '{setup.category}'
+             - intended for '{setup.occasion}'
+            You could omit any of this three: difficulty, category and intended for if they are making no sense.
+            Don't put riddles into response, try don't exceed 500 chars. Start directly, without repetitions of
+            provided information""",
             GameIntro)
+
         if not ai_response:
             raise HTTPException(status_code=500, detail="Failed to initialize game.")
 
@@ -106,11 +120,11 @@ class GameService:
                     geo_data = response.json()
                     location = f"{geo_data['country_code2']}, {geo_data['city']}"
             except (httpx.RequestError, httpx.HTTPStatusError) as e:
-                print(f"Error fetching geolocation for IP {ip}: {e}")
+                logger.error(f"Error fetching geolocation for IP {ip}: {e}")
             except KeyError as e:
-                print(f"Unexpected response structure for IP {ip}: Missing key {e}")
+                logger.error(f"Unexpected response structure for IP {ip}: Missing key {e}")
             except Exception as e:
-                print(f"An unexpected error occurred for IP {ip}: {e}")
+                logger.error(f"An unexpected error occurred for IP {ip}: {e}")
 
             return location
 
@@ -121,8 +135,8 @@ class GameService:
 
         if db_game.ip is None and ip is not None:
             location = await self.fetch_geolocation(ip)
-            logger.info(f"IP: {ip}, Location: {location}")
-            await self.ai_game_repo.update(db_game.id, **{"ip": ip, "location":location})
+            logger.debug(f"IP: {ip}, Location: {location}")
+            await self.ai_game_repo.update(db_game.id, **{"ip": ip, "location": location})
         return db_game
 
     async def generate_puzzle(self, game_uuid: UUID):
@@ -162,23 +176,22 @@ class GameService:
         prev_puzzles_text = ",  ".join(
             f"{i + 1}: `{item}`" for i, item in enumerate(prev_puzzles_desc) if item is not None)
 
-        puzzle_prompt = f"""Generate text puzzle number {puzzle_counter} of 4 for theme {db_game.theme} and
-         description {db_game.description}, don't repeat those information in scenario. Scenario should return some subtle, useful
-          tips to help solve riddles. There should be 3 options (answers) available,
-          and only one correct. `wrong_feedback` numbers should correspond to `options` numbers.
-          Don't repeat previous riddles ideas, create unique and various questions each time:
+        puzzle_prompt = f"""Generate escape room text puzzle number {puzzle_counter} of 4 for theme {db_game.theme} and
+         description {db_game.description}. Don't repeat those information in scenario, use Polish language.
+         Scenario should return some subtle, useful tips to help solve riddles, keep it below 500 chars.
+         There should be 3 options (answers) available, and only one correct. `wrong_feedback` should contains two
+        entries, numbers should correspond to `options` numbers. Don't repeat previous riddles ideas, create unique and
+        various questions each time:
         {prev_puzzles_text}"""
         puzzle_response: PuzzleResponse = await self.get_ai_response(puzzle_prompt, PuzzleResponse)
         if not puzzle_response:
             raise HTTPException(status_code=500, detail="Failed to generate puzzle.")
 
-        print(puzzle_response)
         puzzle_data = {
             f"puzzle_{puzzle_counter}": puzzle_response.model_dump_json()
 
         }
 
-        print(puzzle_data)
         await self.ai_game_repo.update(db_game.id, **puzzle_data)
 
         new_puzzle = CurrentPuzzleResponse(**{
@@ -237,8 +250,10 @@ class GameService:
             f"{i + 1}: `{item}`" for i, item in enumerate(prev_puzzles_desc) if item is not None)
 
         ending_prompt = f"""Generate an ending based on initial intro: `{db_game.intro}` and
-         progress: {prev_puzzles_text} keep it below 300 chars. It should contains unexpected twist"""
-        ending = await self.get_ai_response(ending_prompt, GameOutro)
+         generated puzzles: {prev_puzzles_text} keep it below 300 chars, use Polish language.
+          It should contains unexpected twist"""
+        ending: GameOutro = await self.get_ai_response(ending_prompt, GameOutro)
+        await self.ai_game_repo.update(db_game.id, **{"ending": ending.outro})
 
         return ending
 
