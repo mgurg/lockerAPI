@@ -30,8 +30,13 @@ async def start_game(game_service: gameServiceDependency, setup: GameStart,
 
 
 @game_router.get("/intro/{game_uuid}")
-async def get_intro(game_service: gameServiceDependency, game_uuid: UUID, request: Request,
-                    x_forwarded_for: str = Header(None), auth=Depends(is_app_owner)) -> IntroResponse:
+async def get_intro(
+    game_service: gameServiceDependency,
+    game_uuid: UUID,
+    request: Request,
+    x_forwarded_for: Annotated[str | None, Header()] = None,
+    auth=Depends(is_app_owner)
+) -> IntroResponse:
     client_ip = x_forwarded_for.split(",")[0].strip() if x_forwarded_for else request.client.host
     return await game_service.intro(game_uuid, client_ip)
 
