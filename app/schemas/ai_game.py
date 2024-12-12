@@ -30,7 +30,7 @@ class PuzzleResponse(BaseModel):
     base_hint: str
     options: list[Option]
     correct: Annotated[int, Gt(0)]
-    result: str
+    solution_explanation: str
     wrong_feedback: list[WrongFeedback]
 
 

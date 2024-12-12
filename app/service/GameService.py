@@ -14,6 +14,7 @@ from pydantic import BaseModel, IPvAnyAddress
 from app.config import get_settings
 from app.datbase.repository.AiGameRepo import AiGameRepo
 from app.schemas.ai_game import CurrentPuzzleResponse, GameIntro, GameOutro, GameStart, PuzzleResponse, ReviewRequest
+from app.shared.text_utils import sanitize_and_normalize_text
 
 settings = get_settings()
 
@@ -29,9 +30,10 @@ class GameService:
         start_time = perf_counter()
         try:
             client = AsyncOpenAI(api_key=settings.API_KEY_OPENAI)
-            system_msg = """You are a creative escape room game master. Maintain story continuity and create engaging
-             puzzles that connect logically to previous events. Each puzzle should base on facts or real persons histories
-             but with different mechanics. Response only in Polish language"""
+            system_msg = """You are a creative escape room game master. Maintain story continuity and create engaging \
+            puzzles that connect logically to previous events and intro. Each puzzle should have  different mechanics. \
+            Provide enough information or references to real facts and persons so that the player can guess the solution.
+            Respond only in Polish."""
             response = await client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -59,7 +61,8 @@ class GameService:
             return response_model.model_validate_json(function_args)
         except Exception as e:
             if "401" in str(e):
-                logger.error("Error: Unauthorized. Visit https://platform.openai.com/account/api-keys and verify that your API key is correct.")
+                logger.error(
+                    "Error: Unauthorized. Visit https://platform.openai.com/account/api-keys and verify that your API key is correct.")
             else:
                 logger.error(f"An unexpected error occurred with the OpenAI API: {e}")
             return None
@@ -69,15 +72,20 @@ class GameService:
             logger.info(f"⌛ Time taken for get_ai_response: {elapsed_time:.2f} seconds")
 
     async def start(self, setup: GameStart):
+        theme: str = sanitize_and_normalize_text(setup.theme)
+        description: str = sanitize_and_normalize_text(setup.description)
+        difficulty: str = sanitize_and_normalize_text(setup.difficulty)
+        category: str = sanitize_and_normalize_text(setup.category)
+        occasion: str = sanitize_and_normalize_text(setup.occasion)
 
         ai_response: GameIntro = await self.get_ai_response(
             f"""
             Generate escape room game introduction based on information provided in Polish language.
-             - theme: '{setup.theme}',
-             - details: '{setup.description}',
-             - difficulty: '{setup.difficulty}',
-             - category '{setup.category}'
-             - intended for '{setup.occasion}'
+             - theme: '{theme}',
+             - details: '{description}',
+             - difficulty: '{difficulty}',
+             - category '{category}'
+             - intended for '{occasion}'
             You could omit any of this three: difficulty, category and intended for if they are making no sense.
             Don't put riddles into response, try don't exceed 500 chars. Start directly, without repetitions of
             provided information""",
@@ -89,13 +97,13 @@ class GameService:
         init_game_data = {
             "uuid": str(uuid4()),
             "token": secrets.token_hex(32),
-            "theme": setup.theme,
-            "description": setup.description,
-            "difficulty": setup.difficulty,
-            "category": setup.category,
-            "occasion": setup.occasion,
+            "theme": theme,
+            "description": description,
+            "difficulty": difficulty,
+            "category": category,
+            "occasion": occasion,
             "email": setup.email,
-            "intro": ai_response.intro,
+            "intro": sanitize_and_normalize_text(ai_response.intro),
             "state": "new",
             "current_puzzle": 0,
             "hints_remaining": 2,
@@ -170,27 +178,26 @@ class GameService:
         for old_puzzle in previous_puzzles:
             if old_puzzle is not None:
                 puzzle = json.loads(old_puzzle)
-                prev_puzzles_desc.append(puzzle["scenario"])
-            prev_puzzles_desc.append(None)
+                prev_puzzles_desc.append(
+                    f"Riddle: `{puzzle['scenario'].strip()}`; Correct answer: `{puzzle['solution_explanation'].strip()}`")
 
-        prev_puzzles_text = ",  ".join(
-            f"{i + 1}: `{item}`" for i, item in enumerate(prev_puzzles_desc) if item is not None)
+        prev_puzzles_text = "\n".join(
+            f"{i + 1}: {item}" for i, item in enumerate(prev_puzzles_desc) if item is not None)
 
-        puzzle_prompt = f"""Generate escape room text puzzle number {puzzle_counter} of 4 for theme {db_game.theme} and
-         description {db_game.description}. Don't repeat those information in scenario, use Polish language.
-         Scenario should return some subtle, useful tips to help solve riddles, keep it below 500 chars.
-         There should be 3 options (answers) available, and only one correct. `wrong_feedback` should contains two
-        entries, numbers should correspond to `options` numbers. Don't repeat previous riddles ideas, create unique and
-        various questions each time:
+        puzzle_prompt = f"""Generate escape room text puzzle number {puzzle_counter} of 4 for theme {db_game.theme} \
+        and description {db_game.description}. Don't repeat those information in scenario, use Polish language. \
+        Provide enough information or references to real facts and persons so that the player can guess the solution. \
+        Be sure that you are able be able to solve this puzzle, `solution_explanation` should be detailed. \
+        Keep story it below 500 chars. There should be 3 options (answers) available, and only one correct. \
+        `wrong_feedback` should contains two entries, numbers should correspond to `options` numbers. \
+        Don't repeat previous riddles ideas, create unique and various questions each time. \
+        Previous questions with answers:
         {prev_puzzles_text}"""
         puzzle_response: PuzzleResponse = await self.get_ai_response(puzzle_prompt, PuzzleResponse)
         if not puzzle_response:
             raise HTTPException(status_code=500, detail="Failed to generate puzzle.")
 
-        puzzle_data = {
-            f"puzzle_{puzzle_counter}": puzzle_response.model_dump_json()
-
-        }
+        puzzle_data = {f"puzzle_{puzzle_counter}": puzzle_response.model_dump_json()}
 
         await self.ai_game_repo.update(db_game.id, **puzzle_data)
 
@@ -199,7 +206,7 @@ class GameService:
             "base_hint": puzzle_response.base_hint,
             "options": puzzle_response.options,
             "correct": puzzle_response.correct,
-            "result": puzzle_response.result,
+            "result": puzzle_response.solution_explanation,
             "wrong_feedback": puzzle_response.wrong_feedback,
             "current_puzzle": puzzle_counter,
         })
@@ -214,10 +221,11 @@ class GameService:
         puzzle_counter: int = current_puzzle + 1
 
         puzzle = getattr(db_game, f"puzzle_{puzzle_counter}")
+        print(puzzle)
         puzzle_json = json.loads(puzzle)
         if choice == puzzle_json["correct"]:
             await self.ai_game_repo.update(db_game.id, **{"current_puzzle": db_game.current_puzzle + 1})
-            return {"result": puzzle_json["result"], "correct": True}
+            return {"result": puzzle_json["solution_explanation"], "correct": True}
         else:
             wrong_answers = db_game.wrong_answers + 1
             await self.ai_game_repo.update(db_game.id, **{"wrong_answers": wrong_answers})
