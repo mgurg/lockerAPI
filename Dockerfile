@@ -20,6 +20,7 @@ ENV UV_PYTHON_PREFERENCE=only-system
 
 COPY --chown=appuser:appuser pyproject.toml .
 COPY --chown=appuser:appuser uv.lock .
+COPY --chown=appuser:appuser ./logs /src/logs
 
 RUN uv sync --frozen --no-cache
 

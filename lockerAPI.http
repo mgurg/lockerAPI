@@ -1,4 +1,147 @@
-@item_uuid = 39285ee2-487f-4e8d-acda-66d390b546ca
-### GET request to example server
+@place_name=warszawa
+@ip=91.216.213.142
+
+### get ROOMS by PLACE_NAME
+GET http://localhost:5000/places/{{place_name}}
+Accept: application/json
+Cache-Control: no-cache
+Content-Type: application/json
+
+### get ROOMS by IP_GEOLOCATION
+GET http://localhost:5000/places/geoip
+Accept: application/json
+Cache-Control: no-cache
+Content-Type: application/json
+
+### get ROOM by URL_SLUG
+GET http://localhost:5000/rooms/url/pl/matrix
+Accept: application/json
+Cache-Control: no-cache
+Content-Type: application/json
+
+
+### add NEW_PLACE
+POST http://localhost:5000/places
+Accept: application/json
+Cache-Control: no-cache
+Content-Type: application/json
+
+{
+  "category": "town",
+  "country": "bg",
+  "geo_names": [
+    {
+      "lang": "bg",
+      "name": "Трън"
+    },
+    {
+      "lang": "en",
+      "name": "Tran"
+    },
+    {
+      "lang": "hr",
+      "name": "Tran"
+    },
+    {
+      "lang": "ru",
+      "name": "Трын"
+    }
+  ],
+  "importance": 0.4637567626011294,
+  "lat": 42.8354054,
+  "lat_max": "42.8754054",
+  "lat_min": "42.7954054",
+  "lon": 22.6517667,
+  "lon_max": "22.6917667",
+  "lon_min": "22.6117667",
+  "population": "2443",
+  "region": "Перник"
+}
+
+
+
+### add NEW_ROOM
+POST http://localhost:5000/rooms
+Accept: application/json
+Cache-Control: no-cache
+Content-Type: application/json
+
+{
+  "name": "Piwnica 2.0  - Pokój żużlowy",
+  "city_id": 1,
+  "location": {
+    "street_address": "Nowy Świat 15/17",
+    "city": "Warsaw",
+    "state_province": "Mazowieckie",
+    "postal_code": "00-029",
+    "country": "Poland",
+    "lat": 52.229675,
+    "lon": 21.012230
+  },
+  "translation": {
+    "lang": "pl",
+    "title": "Piwnica 2.0  - Pokój żużlowy",
+    "lead": "Wyścig o życie",
+    "description": "Stań do wyścigu o wszystko, nie zapomnij zebrać drużyny!"
+  }
+}
+
+
 ###
-GET http://localhost:5000/rooms/{{item_uuid}}
+
+//[
+//    {
+//        "room_id": "room-13761",
+//        "room_name": "Uniwersytet Potworny",
+//        "city": "Wrocław",
+//        "url": "https://lock.me/pl/poland/dolnoslaskie/wroclaw/escape-room/trap-jungle/13761-uniwersytet-potworny",
+//        "creator_brand": "Trap Jungle",
+//        "players": "2-4",
+//        "game_time": "60",
+//        "category": "Przygodowy",
+//        "difficulty": "początkujący",
+//        "players_difficulty": null,
+//        "price_from": 290.0,
+//        "currency": "zł",
+//        "badge": null,
+//        "active": true,
+//        "state": "open",
+//        "data_lat": "51.120145373471",
+//        "data_lon": "17.031662464142",
+//        "item_category": "room",
+//        "room_list_index": 0,
+//        "visited": 0,
+//        "want_to_visit": 96,
+//        "id": "13761-uniwersytet-potworny",
+//        "url_desc": "http://www.trap-jungle.com",
+//        "lat": "51.120145373471",
+//        "lon": "17.031662464142",
+//        "phoneNo": "666378206(jeślinieodbieramyzostawwiadomośćSMS)",
+//        "youtube_videos": [],
+//        "isPartner": false,
+//        "title": "Uniwersytet Potworny",
+//        "basic_info": [
+//            "Przyjazny rodzinom z dziećmi",
+//            "Gra bez aktora",
+//            "Nieodpowiednie dla osób z klaustrofobią"
+//        ],
+//        "safety": [
+//            "Pełen monitoring",
+//            "Pełen kontakt z mistrzem gry",
+//            "Przycisk bezpieczeństwa",
+//            "Tylko niskie napięcie w zasięgu gracza"
+//        ],
+//        "languages": [
+//            "polski"
+//        ],
+//        "hasPromo": false,
+//        "description": "Baterie dostarczające energię do miasta Monstropolis są już na wyczerpaniu. Nawet najbardziej przerażający straszolodzy nie są w stanie wywołać, potrzebnego do utrzymania fabryki i miasta, krzyku wśród dzieci. Musicie przejść przyspieszony kurs na straszaków i uratować fabrykę, miasto i wszystkich jego mieszkańców! A może nawet uda Wam się znaleźć inny, skuteczniejszy sposób na naładowanie baterii niż wrzaski? Potwory i spółka czekają na Waszą pomoc!",
+//        "number_of_persons": null,
+//        "duration": "60",
+//        "type": "Przygodowy",
+//        "telephone": "666378206 (jeśli nie odbieramy zostaw wiadomość SMS)",
+//        "creator_url": "https://lock.me/pl/company/trap-jungle",
+//        "creator_logo": "https://img.lock.me/company/733-trap-jungle-5ec63521ad7149.50904548.webp?w=290&h=290&s=98dcb6db0f2142d5af73fde5554ba00a",
+//        "creator_address": "Pomorska 45 \r\n50-217 Wrocław\r\nWejście do lokalu od ul. Paulińskiej (NIE OD PODWÓRKA!) białe, przeszklone drzwi.",
+//        "reviews": []
+//    },

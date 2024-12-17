@@ -32,5 +32,4 @@ async def get_db() -> AsyncSession:
             await session.close()
 
 
-# metadata = sa.MetaData(schema="tenant")
 Base = declarative_base()

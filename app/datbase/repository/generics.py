@@ -1,9 +1,12 @@
 from typing import Any, Generic, TypeVar
+
 from sqlalchemy import and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.models import BaseModel
+
+from app.datbase.models.models import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
+
 
 class GenericRepo(Generic[T]):
     def __init__(self, session: AsyncSession, model: type[T]):
