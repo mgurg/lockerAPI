@@ -1,9 +1,9 @@
+from datetime import UTC, datetime
 from typing import Annotated
 from uuid import uuid4
 
 from fastapi import Depends, HTTPException
 from sqlalchemy import Sequence
-from sqlalchemy.exc import IntegrityError
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from app.config import get_settings
@@ -36,6 +36,11 @@ class CompanyService:
         return db_companies, count
 
     async def create_company(self, company: CompanyAdd):
+        db_company = await self.company_repo.get_by_gov_id(company.gov_id)
+        if db_company:
+            raise HTTPException(status_code=HTTP_409_CONFLICT,
+                                detail=f"Company with {company.gov_id_type} `{company.gov_id}` already exists")
+
         location_data = {
             "street_address": company.location.street_address,
             "city": company.location.city,
@@ -59,16 +64,13 @@ class CompanyService:
             "gov_id_type": company.gov_id_type,
             "website": company.website,
             "phone": company.phone,
-            "verified_at": None
+            "verified_at": None,
+            "created_at": datetime.now(UTC),
         }
 
-        try:
-            new_db_room = await self.company_repo.create(**company_data)
-        except IntegrityError as e:
-            raise HTTPException(status_code=HTTP_409_CONFLICT,
-                                detail=f"Company with {company.gov_id_type} `{company.gov_id}` already exists") from e
+        new_db_company = await self.company_repo.create(**company_data)
 
-        return new_db_room
+        return new_db_company
 
     async def create_department(self, department: DepartmentAdd):
         db_company = await self.company_repo.get_by_uuid(department.company_uuid)

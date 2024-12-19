@@ -37,7 +37,7 @@ class RoomAdd(BaseModel):
     reservation_url: str | None = None
     lm_id: str | None = None
     mt_id: str | None = None
-    location: LocationAdd
+    location: LocationAdd | None = None
     translation: TranslationAdd
 
 

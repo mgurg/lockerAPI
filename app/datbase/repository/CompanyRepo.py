@@ -49,3 +49,9 @@ class CompanyRepo(GenericRepo[Company]):
             total_records = counter
 
         return result.scalars().all(), total_records
+
+    async def get_by_gov_id(self, gov_id: str) -> Company | None:
+        query = select(self.Model).where(self.Model.gov_id == gov_id)
+
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()

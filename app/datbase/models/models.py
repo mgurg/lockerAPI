@@ -149,9 +149,9 @@ class Company(BaseModel):
     website: Mapped[str | None] = mapped_column(String())
     phone: Mapped[str | None] = mapped_column(String())
     email: Mapped[str | None] = mapped_column(String())
-    verified_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=True)
-    created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
-    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+    verified_at: Mapped[DateTime | None] = mapped_column(DateTime())
+    updated_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
+    created_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now())
 
     # street_address: Mapped[str | None] = mapped_column(String())
     # city: Mapped[str | None] = mapped_column(String())

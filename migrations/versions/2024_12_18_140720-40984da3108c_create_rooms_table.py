@@ -1,19 +1,19 @@
-"""create_rooms_table
+"""create rooms table
 
-Revision ID: 912c81548120
-Revises: 16147e63828f
-Create Date: 2024-10-04 15:12:18.269921
+Revision ID: 40984da3108c
+Revises: 80b9126a11c4
+Create Date: 2024-12-18 14:07:20.960936
 
 """
 from typing import Sequence, Union
 
-import sqlalchemy as sa
 from alembic import op
+import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '912c81548120'
-down_revision: Union[str, None] = '16147e63828f'
+revision: str = '40984da3108c'
+down_revision: Union[str, None] = '80b9126a11c4'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

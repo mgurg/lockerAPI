@@ -3,8 +3,8 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Depends, Query
 from starlette.status import HTTP_204_NO_CONTENT
 
-from app.datbase.models.responses import CompaniesPaginated
 from app.schemas.requests import CompanyAdd, DepartmentAdd
+from app.schemas.responses import CompaniesPaginated
 from app.service.CompanyService import CompanyService
 
 company_router = APIRouter()

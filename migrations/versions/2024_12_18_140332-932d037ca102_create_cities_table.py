@@ -1,18 +1,19 @@
-"""create_cities_table
+"""create cities table
 
-Revision ID: c3b31d2c21fe
-Revises: 2dc5d7298080
-Create Date: 2024-10-04 15:11:26.616469
+Revision ID: 932d037ca102
+Revises: 7c0abf870dc3
+Create Date: 2024-12-18 14:03:32.641446
 
 """
 from typing import Sequence, Union
 
-import sqlalchemy as sa
 from alembic import op
+import sqlalchemy as sa
+
 
 # revision identifiers, used by Alembic.
-revision: str = 'c3b31d2c21fe'
-down_revision: Union[str, None] = '2dc5d7298080'
+revision: str = '932d037ca102'
+down_revision: Union[str, None] = '7c0abf870dc3'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -21,8 +22,6 @@ def upgrade() -> None:
     op.create_table(
         'cities',
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
-        # sa.Column('local_id', sa.TEXT(), nullable=True),
-        # sa.Column('local_id_type', sa.TEXT(), nullable=True),
         sa.Column('lat', sa.Numeric(precision=10, scale=7), nullable=True),
         sa.Column('lon', sa.Numeric(precision=10, scale=7), nullable=True),
         sa.Column('lat_min', sa.Numeric(precision=10, scale=7), nullable=True),  # South Latitude

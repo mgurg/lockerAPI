@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header
+from pydantic import IPvAnyAddress
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
 from starlette.requests import Request
@@ -24,9 +25,10 @@ async def place_by_name(place_service: placeServiceDependency, location_name: st
 
 
 @place_router.get("/geoip")
-async def place_by_uuid(place_service: placeServiceDependency, request: Request):
-    client_host = request.client.host
-    db_item = await place_service.get_rooms_by_ip(client_host)
+async def place_by_uuid(place_service: placeServiceDependency, request: Request, x_forwarded_for: Annotated[str | None, Header()] = None,):
+    client_ip_str = x_forwarded_for.split(",")[0].strip() if x_forwarded_for else request.client.host
+    client_ip = IPvAnyAddress(client_ip_str)
+    db_item = await place_service.get_rooms_by_ip(client_ip)
 
     return db_item
 

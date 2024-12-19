@@ -1,19 +1,20 @@
-"""create_companies_table
+"""create companies table
 
-Revision ID: fc1e91dfc44a
-Revises: 9719acbdfebc
-Create Date: 2024-10-04 15:12:00.825081
+Revision ID: 999c3d41ebdf
+Revises: f974b6c2aa0e
+Create Date: 2024-12-18 14:06:01.314836
 
 """
 from typing import Sequence, Union
 
-import sqlalchemy as sa
 from alembic import op
+import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+
 # revision identifiers, used by Alembic.
-revision: str = 'fc1e91dfc44a'
-down_revision: Union[str, None] = '9719acbdfebc'
+revision: str = '999c3d41ebdf'
+down_revision: Union[str, None] = 'f974b6c2aa0e'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -14,6 +14,8 @@ from unidecode import unidecode
 
 from app.datbase.models.models import Room
 from app.datbase.repository.CityRepo import CityRepo
+from app.datbase.repository.CompanyRepo import CompanyRepo
+from app.datbase.repository.DepartmentRepo import DepartmentRepo
 from app.datbase.repository.LocationRepo import LocationRepo
 from app.datbase.repository.RoomRepo import RoomRepo
 from app.datbase.repository.RoomTranslationRepo import RoomTranslationRepo
@@ -26,11 +28,15 @@ class RoomService:
             room_repo: Annotated[RoomRepo, Depends()],
             city_repo: Annotated[CityRepo, Depends()],
             location_repo: Annotated[LocationRepo, Depends()],
+            company_repo: Annotated[CompanyRepo, Depends()],
+            department_repo: Annotated[DepartmentRepo, Depends()],
             room_translation_repo: Annotated[RoomTranslationRepo, Depends()]
     ) -> None:
         self.room_repo = room_repo
         self.city_repo = city_repo
         self.location_repo = location_repo
+        self.company_repo = company_repo
+        self.department_repo = department_repo
         self.room_translation_repo = room_translation_repo
 
     async def get_room_by_uuid(self, room_uuid: UUID) -> Room | None:
@@ -84,6 +90,20 @@ class RoomService:
             unique_slug = await self.generate_unique_slug(room.name, room.location.city)
         except ValueError as e:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(e)) from e
+
+        db_company = await self.company_repo.get_by_uuid(room.company_uuid)
+        if not db_company:
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"Company `{room.company_uuid}` not found!")
+
+        if room.department_uuid is not None:
+            db_department = await self.department_repo.get_by_uuid(room.department_uuid)
+            if not db_department:
+                raise HTTPException(status_code=HTTP_400_BAD_REQUEST,
+                                    detail=f"Company `{room.department_uuid}` not found!")
+
+        print(db_company.location) # TODO: load relations
+        # print(db_department.location)
+        return None
 
         if room.location:
             location_data = {
