@@ -68,12 +68,34 @@ class RoomService:
 
         return db_item
 
-    async def get_room_by_location_and_language(self, location: str, language: str,
-                                                load_relations: list[str | BinaryExpression] = None):
+    async def get_rooms_by_location_and_language(self, location: str, language: str,
+                                                 load_relations: list[str | BinaryExpression],
+                                                 offset: int,
+                                                 limit: int,
+                                                 sort_column: str,
+                                                 sort_order: str):
+        url_safe_place = RoomService.sanitize_input(location)
+        city = await self.city_repo.get_place_by_name(url_safe_place)
+        if city is None:
+            raise HTTPException(
+                status_code=HTTP_404_NOT_FOUND,
+                detail=f"Place `{location}` as: `{url_safe_place}` not found!"
+            )
 
-        db_items = await self.room_repo.get_by_location_and_language(location, language, load_relations)
+        rooms, count = await self.room_repo.get_by_bbox(
+            city.lon_min,
+            city.lon_max,
+            city.lat_min,
+            city.lat_max,
+            load_relations,
+            offset, limit, sort_column, sort_order
+        )
 
-        return db_items
+        lang_code = language
+        for room in rooms:
+            translation = next((t for t in room.translations if t.lang == lang_code.lower()), None)
+            room.translation = translation if translation else None
+        return rooms, count
 
     async def room_exists_by_url_slug(self, room_url_slug: str) -> bool:
         db_item = await self.room_repo.get_by_url_slug(room_url_slug)

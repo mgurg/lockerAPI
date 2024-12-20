@@ -100,8 +100,8 @@ class Room(BaseModel):
     lm_id: Mapped[str | None]
     mt_id: Mapped[str | None]
     order: Mapped[str | None]
-    created_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
-    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
+    created_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now())
 
     # city: Mapped["City"] = relationship(back_populates="rooms")
     location: Mapped[Optional["Location"]] = relationship(back_populates="rooms")

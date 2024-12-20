@@ -50,8 +50,11 @@ class RoomRepo(GenericRepo[Room]):
 
         ...
 
-    async def get_by_bbox(self, min_lon: float, max_lon: float, min_lat: float, max_lat: float,
-                          load_relations: list[str | BinaryExpression] = None) -> Sequence[Room]:
+    async def get_by_bbox(
+            self, min_lon: float, max_lon: float, min_lat: float, max_lat: float,
+            load_relations: list[str | BinaryExpression], offset: int, limit: int,
+            sort_column: str, sort_order: str
+    ) -> tuple[Sequence[Room], int]:
         # bbox = left,bottom,right,top
         # bbox = min Longitude , min Latitude , max Longitude , max Latitude
 
@@ -70,8 +73,19 @@ class RoomRepo(GenericRepo[Room]):
         )
 
         query = self._apply_relationship_loading(query, load_relations)
-        result = await self.session.execute(query)
-        return result.scalars().all()
+        result = await self.session.execute(query.offset(offset).limit(limit))
+
+        total_records: int = 0
+
+        count_statement = (
+            select(func.count(self.Model.id))
+        )
+        count_result = await self.session.execute(count_statement)
+        counter = count_result.scalar_one_or_none()
+        if counter:
+            total_records = counter
+
+        return result.scalars().all(), total_records
 
     async def get_nearby_rooms(self, lat: float, lon: float, load_relations: list[str | BinaryExpression] = None) -> \
             Sequence[Room]:

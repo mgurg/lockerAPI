@@ -51,7 +51,7 @@ class PlaceService:
             ["translations"]
         )
 
-        lang_code = "pl"
+        lang_code = language
         for room in rooms:
             translation = next((t for t in room.translations if t.lang == lang_code.lower()), None)
             room.translation = translation if translation else None

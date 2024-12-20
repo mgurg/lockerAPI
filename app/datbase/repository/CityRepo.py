@@ -59,7 +59,11 @@ class CityRepo(GenericRepo[City]):
 
         return city
 
-    async def get_places_by_bbox(self, latitude: float, longitude: float, load_relations: list[str | BinaryExpression] = None) -> Sequence[City]:
+    async def get_places_by_bbox(self,
+                                 latitude: float,
+                                 longitude: float,
+                                 load_relations: list[str | BinaryExpression] = None
+                                 ) -> Sequence[City]:
         query = (
             select(self.Model)
             .where(

@@ -1,10 +1,12 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from pydantic_extra_types.country import CountryAlpha2
+from pydantic_extra_types.language_code import LanguageAlpha2
 
 from app.schemas.requests import RoomAdd
+from app.schemas.responses import RoomIndexResponse, RoomsPaginated
 from app.service.RoomService import RoomService
 
 room_router = APIRouter()
@@ -21,19 +23,35 @@ async def room_by_uuid(room_service: roomServiceDependency, room_uuid: UUID):
 
 
 @room_router.get("/url/{language}/{room_url_slug}")
-async def room_by_url_slug(room_service: roomServiceDependency, language: CountryAlpha2, room_url_slug: str):
-    db_item = await room_service.get_room_by_url_slug_and_language(room_url_slug, language,
-                                                                   ["location", "translations"])
+async def room_by_url_slug(room_service: roomServiceDependency, language: CountryAlpha2,
+                           room_url_slug: str) -> RoomIndexResponse:
+    db_item = await room_service.get_room_by_url_slug_and_language(
+        room_url_slug, language, ["location", "translations"]
+    )
 
     return db_item
 
 
 @room_router.get("/url/{language}/place/{location}")
-async def rooms_by_location(room_service: roomServiceDependency, language: CountryAlpha2, location: str):
-    db_items = await room_service.get_room_by_location_and_language(location, language,
-                                                                   ["city", "location", "translations"])
+async def rooms_by_location(
+        room_service: roomServiceDependency,
+        language: LanguageAlpha2, location: str,
+        limit: int = 10,
+        offset: int = 0,
+        field: Literal["name", "created_at"] = "name",
+        order: Literal["asc", "desc"] = "asc",
+):
+    relations = ["location", "translations"]
+    db_rooms, count = await room_service.get_rooms_by_location_and_language(
+        location,
+        language,
+        relations,
+        offset, limit, field, order,
+    )
 
-    return db_items
+    print(db_rooms[0].location.city)
+    return RoomsPaginated(data=db_rooms, count=count, offset=offset, limit=limit)
+    # return db_rooms
 
 
 @room_router.post("/department")
