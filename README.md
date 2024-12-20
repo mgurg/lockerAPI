@@ -68,3 +68,5 @@ http://localhost:5000/{language}/l/{location}
 http://localhost:5000/{language}/l/{location}/{tag}
 http://localhost:5000/{language}/c/{company_name}
 
+## TODO:
+ - don't allow to add duplicated departments

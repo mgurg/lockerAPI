@@ -1,9 +1,8 @@
-from collections.abc import Sequence
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import BinaryExpression, func, select
+from sqlalchemy import BinaryExpression, Sequence, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -47,7 +46,7 @@ class RoomRepo(GenericRepo[Room]):
         return result.scalar_one_or_none()
 
     async def get_by_location_and_language(self, slug: str, lang_code: str,
-                                       load_relations: list[str | BinaryExpression] = None) -> Room | None:
+                                           load_relations: list[str | BinaryExpression] = None) -> Room | None:
 
         ...
 
@@ -75,7 +74,7 @@ class RoomRepo(GenericRepo[Room]):
         return result.scalars().all()
 
     async def get_nearby_rooms(self, lat: float, lon: float, load_relations: list[str | BinaryExpression] = None) -> \
-    Sequence[Room]:
+            Sequence[Room]:
         # Haversine formula to calculate distance
         query = (
             select(self.Model)

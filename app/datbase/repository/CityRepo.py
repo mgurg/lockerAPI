@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import Depends
 from pydantic_extra_types.country import CountryAlpha2
-from sqlalchemy import select
+from sqlalchemy import BinaryExpression, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -19,6 +19,20 @@ class CityRepo(GenericRepo[City]):
     def __init__(self, session: UserDB) -> None:
         self.Model = City
         super().__init__(session, self.Model)
+
+    def _apply_relationship_loading(self, query, load_relations: list[str | BinaryExpression] = None):
+        if not load_relations:
+            return query
+
+        for relation in load_relations:  # load_relations=["*"]
+            if relation == "*":
+                return query.options(selectinload("*"))
+            elif isinstance(relation, str):  # load_relations=["city", "location"]
+                query = query.options(selectinload(getattr(self.Model, relation)))
+            elif isinstance(relation, BinaryExpression):  # load_relations=[Room.city, Room.location]
+                query = query.options(selectinload(relation))
+
+        return query
 
     async def get_by_uuid(self, uuid: UUID) -> City | None:
         query = select(self.Model).where(self.Model.uuid == uuid)
@@ -45,7 +59,7 @@ class CityRepo(GenericRepo[City]):
 
         return city
 
-    async def get_places_by_bbox(self, latitude: float, longitude: float) -> Sequence[City]:
+    async def get_places_by_bbox(self, latitude: float, longitude: float, load_relations: list[str | BinaryExpression] = None) -> Sequence[City]:
         query = (
             select(self.Model)
             .where(
@@ -55,6 +69,6 @@ class CityRepo(GenericRepo[City]):
                 (self.Model.lon_max >= longitude)
             )
         )
-
+        query = self._apply_relationship_loading(query, load_relations)
         result = await self.session.execute(query)
         return result.scalars().all()

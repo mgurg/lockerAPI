@@ -38,7 +38,7 @@ class RoomAdd(BaseModel):
     lm_id: str | None = None
     mt_id: str | None = None
     location: LocationAdd | None = None
-    translation: TranslationAdd
+    translation: list[TranslationAdd]
 
 
 class GeoNameAdd(BaseModel):
@@ -74,6 +74,6 @@ class CompanyAdd(BaseModel):
 
 
 class DepartmentAdd(BaseModel):
-    company_uuid: UUID | None = None
-    location: LocationAdd
+    company_uuid: UUID
     name: str
+    location: LocationAdd | None = None

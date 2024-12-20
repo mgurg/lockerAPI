@@ -1,0 +1,65 @@
+@place_name=warszawa
+@ip=91.216.213.142
+
+
+### Create new Company
+POST http://localhost:5000/companies
+Accept: application/json
+Cache-Control: no-cache
+Content-Type: application/json
+
+{
+  "name": "string",
+  "brand": "string",
+  "gov_id": "string",
+  "gov_id_type": "string",
+  "website": "string",
+  "email": "string",
+  "phone": "string",
+  "location": {
+    "street_address": "string",
+    "city": "string",
+    "state_province": "string",
+    "postal_code": "string",
+    "country": "Ff",
+    "located_in": "string",
+    "type": "company",
+    "lat": 0,
+    "lon": 0
+  }
+}
+
+### Create new main department (based on HQ adress)
+POST http://0.0.0.0:5000/companies/department
+accept: application/json
+Content-Type: application/json
+
+{
+  "company_uuid": "a64096f2-138c-45af-9966-04358914f831",
+  "name": "Kraków HQ"
+}
+
+### Create new Department from scratch
+
+POST http://0.0.0.0:5000/companies/department
+accept: application/json
+Content-Type: application/json
+
+{
+  "company_uuid": "3fa85f64-5717-4562-b3fc-2c963f66afa1",
+  "name": "string",
+  "location": {
+    "street_address": "string",
+    "city": "string",
+    "state_province": "string",
+    "postal_code": "string",
+    "country": "Pu",
+    "located_in": "string",
+    "type": "company",
+    "lat": 0,
+    "lon": 0
+  }
+}
+
+###
+

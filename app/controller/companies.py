@@ -31,8 +31,7 @@ async def add_company(company_service: companyServiceDependency, company: Compan
     return None
 
 
-@company_router.post("/department")
-async def add_room(company_service: companyServiceDependency, department: DepartmentAdd):
-    db_item = await company_service.create_department(department)
-
-    return db_item
+@company_router.post("/department", status_code=HTTP_204_NO_CONTENT)
+async def add_company_department(company_service: companyServiceDependency, department: DepartmentAdd):
+    await company_service.create_department(department)
+    return None

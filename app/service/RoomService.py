@@ -80,70 +80,77 @@ class RoomService:
         return db_item is not None
 
     async def create_room(self, room: RoomAdd) -> Room | None:
-        if room.location.lat and room.location.lon:
-            db_cities = await self.city_repo.get_places_by_bbox(room.location.lat, room.location.lon)
+        db_company = await self.company_repo.get_by_uuid(room.company_uuid, ["location"])
+        if not db_company:
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"Company `{room.company_uuid}` not found!")
+        location = db_company.location
+
+        db_department = await self.department_repo.get_by_uuid(room.department_uuid, ["location"])
+        if not db_department:
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST,
+                                detail=f"Department `{room.department_uuid}` not found!")
+        location = db_department.location
+
+        location_data = {
+            "street_address": room.location.street_address if room.location else location.street_address,
+            "city": room.location.city if room.location else location.city,
+            "state_province": room.location.state_province if room.location else location.state_province,
+            "postal_code": room.location.postal_code if room.location else location.postal_code,
+            "country": room.location.country if room.location else location.country,
+            "lat": room.location.lat if room.location else location.lat,
+            "lon": room.location.lon if room.location else location.lon,
+            "type": "room"
+        }
+
+        db_location = await self.location_repo.create(**location_data)
+
+        translation = ""
+        if db_location.lat and db_location.lon:
+            db_cities = await self.city_repo.get_places_by_bbox(db_location.lat, db_location.lon,
+                                                                ["geo_names"])
             for city in db_cities:
-                logger.info(f"Matching `{room.name}` with {city.id}")
+                translation = next((t for t in city.geo_names if t.lang == "pl"), None)
+                logger.info(f"Matching `{room.name}` with {city.id} as {translation.name}")
         else:
-            logger.warning(f"No lat long data for `{room.name}`: {room.location.street_address}, {room.location.city}")
+            logger.warning(
+                f"No lat/long data for `{room.name}`: {location_data["street_address"]}, {location_data["city"]}")
         try:
-            unique_slug = await self.generate_unique_slug(room.name, room.location.city)
+            unique_slug = await self.generate_unique_slug(room.name, translation.name)
+
         except ValueError as e:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
-        db_company = await self.company_repo.get_by_uuid(room.company_uuid)
-        if not db_company:
-            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"Company `{room.company_uuid}` not found!")
+        room_data = {
+            "uuid": str(uuid4()),
+            "url_slug": unique_slug,
+            "name": room.name,
+            "active": True,
+            "location": db_location,
+            "price_from": room.price_from,
+            "game_duration": room.game_duration,
+            "players_min": room.players_min,
+            "players_max": room.players_max,
+            "reservation_url": room.reservation_url,
+            "lm_id": room.lm_id,
+            "mt_id": room.mt_id,
+            # "company_id" : db_company.id,
+            # "department_id" : db_department.id,
+        }
 
-        if room.department_uuid is not None:
-            db_department = await self.department_repo.get_by_uuid(room.department_uuid)
-            if not db_department:
-                raise HTTPException(status_code=HTTP_400_BAD_REQUEST,
-                                    detail=f"Company `{room.department_uuid}` not found!")
+        new_db_room = await self.room_repo.create(**room_data)
 
-        print(db_company.location) # TODO: load relations
-        # print(db_department.location)
-        return None
-
-        if room.location:
-            location_data = {
-                "street_address": room.location.street_address,
-                "city": room.location.city,
-                "state_province": room.location.state_province,
-                "postal_code": room.location.postal_code,
-                "country": room.location.country,
-                "lat": room.location.lat,
-                "lon": room.location.lon,
-            }
-            db_location = await self.location_repo.create(**location_data)
-
-            room_data = {
-                "uuid": str(uuid4()),
-                "url_slug": unique_slug,
-                "name": room.name,
-                "active": True,
-                # "city": db_city,
-                "location": db_location,
-                "price_from": room.price_from,
-                "game_duration": room.game_duration,
-                "reservation_url": room.reservation_url,
-                "lm_id": room.lm_id,
-                "mt_id": room.mt_id,
-            }
-
-            new_db_room = await self.room_repo.create(**room_data)
-
+        for translation in room.translation:
             room_translation_data = {
                 "room_id": new_db_room.id,
-                "lang": room.translation.lang,
-                "title": room.translation.title,
-                "lead": room.translation.lead,
-                "description": room.translation.description,
+                "lang": translation.lang,
+                "title": translation.title,
+                "lead": translation.lead,
+                "description": translation.description,
             }
 
             await self.room_translation_repo.create(**room_translation_data)
 
-            return new_db_room
+        return new_db_room
 
     @staticmethod
     def sanitize_input(input_str: str) -> str:
