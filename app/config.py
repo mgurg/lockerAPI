@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     API_KEY_IPGEOLOCATION: str = os.getenv("API_KEY_IPGEOLOCATION")
     API_KEY_OPENAI: str = os.getenv("API_KEY_OPENAI")
 
+    SENTRY_DSN: str = os.getenv("SENTRY_DSN")
+
     model_config = SettingsConfigDict(
         env_prefix="", env_file_encoding="utf-8", env_file=f"{APP_DIR}/.env", extra="allow"
     )

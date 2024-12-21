@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
+import sentry_sdk
 
 from app.config import get_settings
 from app.controller.companies import company_router
@@ -43,8 +44,20 @@ def create_application() -> FastAPI:
 
     return app
 
-
 app = create_application()
+
+sentry_sdk.init(
+    dsn=settings.SENTRY_DSN,
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for tracing.
+    traces_sample_rate=1.0,
+    _experiments={
+        # Set continuous_profiling_auto_start to True
+        # to automatically start the profiler on when
+        # possible.
+        "continuous_profiling_auto_start": True,
+    },
+)
 
 
 @app.get("/")
