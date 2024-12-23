@@ -33,8 +33,6 @@ COPY --chown=appuser:appuser ./alembic.ini /src/alembic.ini
 
 EXPOSE 5000
 
-#CMD ["uvicorn", "app.main:app","--no-server-header","--no-proxy-headers", "--host", "0.0.0.0", "--port", "5000" ]
-
 # Run the application.
 CMD ["/src/.venv/bin/fastapi", "run", "/src/app/main.py", "--port", "5000"]
 

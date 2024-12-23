@@ -5,9 +5,9 @@ from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.datbase.db import get_db
-from app.datbase.models.models import AiGame
-from app.datbase.repository.generics import GenericRepo
+from app.database.db import get_db
+from app.database.models.models import AiGame
+from app.database.repository.generics import GenericRepo
 
 UserDB = Annotated[AsyncSession, Depends(get_db)]
 

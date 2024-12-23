@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Header
 from starlette.requests import Request
 from starlette.status import HTTP_204_NO_CONTENT
 
-from app.datbase.bearer_auth import is_app_owner
+from app.database.bearer_auth import is_app_owner
 from app.schemas.ai_game import (
     AnswerRequest,
     AnswerResponse,

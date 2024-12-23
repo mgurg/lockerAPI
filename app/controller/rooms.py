@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
+from starlette.status import HTTP_204_NO_CONTENT
 
 from app.schemas.requests import RoomAdd
 from app.schemas.responses import RoomIndexResponse, RoomsPaginated
@@ -49,7 +50,6 @@ async def rooms_by_location(
         offset, limit, field, order,
     )
 
-    print(db_rooms[0].location.city)
     return RoomsPaginated(data=db_rooms, count=count, offset=offset, limit=limit)
     # return db_rooms
 
@@ -66,3 +66,15 @@ async def add_room(room_service: roomServiceDependency, room: RoomAdd):
     db_item = await room_service.create_room(room)
 
     return db_item
+
+
+@room_router.delete("/{room_uuid}", status_code=HTTP_204_NO_CONTENT)
+async def delete_room(room_service: roomServiceDependency, room_uuid: UUID):
+    await room_service.delete_room(room_uuid)
+
+    return None
+
+
+@room_router.delete("/department/{department_uuid}", status_code=HTTP_204_NO_CONTENT)
+async def delete_department(room_service: roomServiceDependency, department_uuid: UUID):
+    return None

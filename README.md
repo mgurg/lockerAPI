@@ -61,6 +61,11 @@ ruff check app/ --fix
 TRUNCATE TABLE locations RESTART IDENTITY CASCADE ;
 ```
 
+### LLM friendly version:
+```bash
+bunx repomix --ignore "**/*.log,tmp,Readme.md,uv.lock"
+```
+
 ## ADR
 
 http://localhost:5000/{language}/{room_name}

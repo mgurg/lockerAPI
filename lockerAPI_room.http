@@ -34,6 +34,38 @@ Content-Type: application/json
   ]
 }
 
+### Create new room
+POST http://0.0.0.0:5000/rooms
+accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Szepty lasu",
+  "company_uuid": "a64096f2-138c-45af-9966-04358914f831",
+  "department_uuid": "8c844511-3d34-45e4-a6dd-2d0bd7bc63fc",
+  "price_from": 170,
+  "game_duration": 60,
+  "players_min": 2,
+  "players_max": 4,
+  "reservation_url": "https://lockandroll.pl/booking/7/",
+  "lm_id": "room-13629",
+  "mt_id": null,
+  "translation": [
+    {
+      "lang": "pl",
+      "title": "Szepty Lasu",
+      "lead": "Wyrusz w poszukiwaniu legendarnego kwiatu paproci podczas Nocy Świętojańskiej!",
+      "description": "Wejdź do świata pradawnych słowiańskich wierzeń i podejmij się wyjątkowego wyzwania – odnalezienia legendarnego kwiatu paproci. Tylko raz w roku, podczas magicznej Nocy Świętojańskiej, możecie stanąć przed szansą odkrycia tego niezwykłego skarbu. Czeka na Was tajemniczy las pełen zagadek, niebezpieczeństw i pradawnej magii. Bądźcie czujni, bo magia tego miejsca nie zna granic!"
+    },
+    {
+      "lang": "en",
+      "title": "Whispers of the Forest",
+      "lead": "Embark on a quest to find the legendary fern flower during Midsummer Night!",
+      "description": "Enter the world of ancient Slavic beliefs and take on the extraordinary challenge of finding the legendary fern flower. Once a year, during the magical Midsummer Night, you have the chance to uncover this mystical treasure. The enchanted forest awaits, full of puzzles, dangers, and ancient magic. Stay alert, as the magic of this place knows no limits!"
+    }
+  ]
+}
+
 ### Create new room - full template
 POST http://0.0.0.0:5000/rooms
 accept: application/json

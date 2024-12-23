@@ -1,11 +1,11 @@
 from typing import Optional
 
 import sqlalchemy as sa
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Numeric, String, Table, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.datbase.db import Base
+from app.database.db import Base
 
 
 class BaseModel(Base):
@@ -22,12 +22,12 @@ class BaseModel(Base):
     id: Mapped[int] = mapped_column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
 
 
-room_language_link = Table(
-    "room_language_link",
-    Base.metadata,
-    Column("room_id", sa.Integer, ForeignKey("rooms.id", ondelete="CASCADE"), primary_key=True),
-    Column("language_id", sa.Integer, ForeignKey("languages.id", ondelete="CASCADE"), primary_key=True)
-)
+# room_language_link = Table(
+#     "room_language_link",
+#     Base.metadata,
+#     Column("room_id", sa.Integer, ForeignKey("rooms.id", ondelete="CASCADE"), primary_key=True),
+#     Column("language_id", sa.Integer, ForeignKey("languages.id", ondelete="CASCADE"), primary_key=True)
+# )
 
 
 class Location(BaseModel):
@@ -87,6 +87,8 @@ class Room(BaseModel):
     url_slug: Mapped[str]
     # city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"))
     location_id: Mapped[int | None] = mapped_column(ForeignKey("locations.id"))
+    company_id: Mapped[int | None] = mapped_column(ForeignKey("companies.id"))
+    department_id: Mapped[int | None] = mapped_column(ForeignKey("departments.id"))
     name: Mapped[str]
     active: Mapped[bool]
     players_min: Mapped[int | None]
@@ -106,21 +108,21 @@ class Room(BaseModel):
     # city: Mapped["City"] = relationship(back_populates="rooms")
     location: Mapped[Optional["Location"]] = relationship(back_populates="rooms")
     translations: Mapped[list["RoomTranslation"]] = relationship(back_populates="room")
-    languages: Mapped[list["Language"]] = relationship(secondary="room_language_link", back_populates="rooms")
+    # languages: Mapped[list["Language"]] = relationship(secondary="room_language_link", back_populates="rooms")
     # tags: Mapped[List["Tag"]] = relationship(secondary="room_tag", back_populates="rooms")
 
 
-class Language(Base):
-    __tablename__ = "languages"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String, nullable=False)
-    code: Mapped[str] = mapped_column(String, nullable=False)
-
-    # Many-to-many relationship with Room
-    rooms: Mapped[list[Room]] = relationship(
-        secondary=room_language_link, back_populates="languages"
-    )
+# class Language(Base):
+#     __tablename__ = "languages"
+#
+#     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+#     name: Mapped[str] = mapped_column(String, nullable=False)
+#     code: Mapped[str] = mapped_column(String, nullable=False)
+#
+#     # Many-to-many relationship with Room
+#     rooms: Mapped[list[Room]] = relationship(
+#         secondary=room_language_link, back_populates="languages"
+#     )
 
 
 class RoomTranslation(BaseModel):

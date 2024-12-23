@@ -1,4 +1,3 @@
-import re
 from typing import Annotated
 from uuid import UUID, uuid4
 
@@ -10,16 +9,16 @@ from starlette.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
 )
-from unidecode import unidecode
 
-from app.datbase.models.models import Room
-from app.datbase.repository.CityRepo import CityRepo
-from app.datbase.repository.CompanyRepo import CompanyRepo
-from app.datbase.repository.DepartmentRepo import DepartmentRepo
-from app.datbase.repository.LocationRepo import LocationRepo
-from app.datbase.repository.RoomRepo import RoomRepo
-from app.datbase.repository.RoomTranslationRepo import RoomTranslationRepo
+from app.database.models.models import Room
+from app.database.repository.CityRepo import CityRepo
+from app.database.repository.CompanyRepo import CompanyRepo
+from app.database.repository.DepartmentRepo import DepartmentRepo
+from app.database.repository.LocationRepo import LocationRepo
+from app.database.repository.RoomRepo import RoomRepo
+from app.database.repository.RoomTranslationRepo import RoomTranslationRepo
 from app.schemas.requests import RoomAdd
+from app.shared.text_utils import sanitize_location_input
 
 
 class RoomService:
@@ -40,33 +39,33 @@ class RoomService:
         self.room_translation_repo = room_translation_repo
 
     async def get_room_by_uuid(self, room_uuid: UUID) -> Room | None:
-        db_item = await self.room_repo.get_by_uuid(room_uuid)
+        db_room = await self.room_repo.get_by_uuid(room_uuid)
 
-        if not db_item:
+        if not db_room:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Room `{room_uuid}` not found!")
 
-        return db_item
+        return db_room
 
     async def get_room_by_url_slug(self, room_url_slug: str,
                                    load_relations: list[str | BinaryExpression] = None) -> Room | None:
-        db_item = await self.room_repo.get_by_url_slug(room_url_slug, load_relations)
+        db_room = await self.room_repo.get_by_url_slug(room_url_slug, load_relations)
 
-        if not db_item:
+        if not db_room:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Room `{room_url_slug}` not found!")
 
-        return db_item
+        return db_room
 
     async def get_room_by_url_slug_and_language(self, room_url_slug, lang_code: CountryAlpha2,
                                                 load_relations: list[str | BinaryExpression] = None):
-        db_item = await self.room_repo.get_by_url_slug_and_lang(room_url_slug, lang_code, load_relations)
-        if not db_item:
+        db_room = await self.room_repo.get_by_url_slug_and_lang(room_url_slug, lang_code, load_relations)
+        if not db_room:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Room `{room_url_slug}` not found!")
 
         # Fetch the specific translation for the given language
-        translation = next((t for t in db_item.translations if t.lang == lang_code.lower()), None)
-        db_item.translation = translation if translation else None
+        translation = next((t for t in db_room.translations if t.lang == lang_code.lower()), None)
+        db_room.translation = translation if translation else None
 
-        return db_item
+        return db_room
 
     async def get_rooms_by_location_and_language(self, location: str, language: str,
                                                  load_relations: list[str | BinaryExpression],
@@ -74,7 +73,7 @@ class RoomService:
                                                  limit: int,
                                                  sort_column: str,
                                                  sort_order: str):
-        url_safe_place = RoomService.sanitize_input(location)
+        url_safe_place = sanitize_location_input(location)
         city = await self.city_repo.get_place_by_name(url_safe_place)
         if city is None:
             raise HTTPException(
@@ -155,8 +154,8 @@ class RoomService:
             "reservation_url": room.reservation_url,
             "lm_id": room.lm_id,
             "mt_id": room.mt_id,
-            # "company_id" : db_company.id,
-            # "department_id" : db_department.id,
+            "company_id": db_company.id,
+            "department_id": db_department.id,
         }
 
         new_db_room = await self.room_repo.create(**room_data)
@@ -174,33 +173,29 @@ class RoomService:
 
         return new_db_room
 
-    @staticmethod
-    def sanitize_input(input_str: str) -> str:
-        """
-        Sanitize string to make it URL-safe.
-        Remove non-alphanumeric characters, replace spaces with hyphens,
-        and handle duplicate or leading/trailing hyphens.
-        """
-        # Transliterate Unicode characters to ASCII
-        safe_name = unidecode(input_str)
+    async def delete_room(self, room_uuid: UUID) -> None:
+        db_room = await self.room_repo.get_by_uuid(room_uuid)
+        if not db_room:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Room `{room_uuid}` not found!")
 
-        # Replace non-alphanumeric characters (except hyphens) with spaces
-        cleaned_str = re.sub(r"[^a-zA-Z0-9\s-]", " ", safe_name)
+        db_translations = await self.room_translation_repo.get_translations_by_room_id(db_room.id)
 
-        # Replace spaces with hyphens, collapse multiple spaces/hyphens into one
-        hyphenated_str = re.sub(r"[\s-]+", "-", cleaned_str).lower()
+        for translation in db_translations:
+            await self.room_translation_repo.delete(translation.id)
 
-        # Remove leading and trailing hyphens
-        return hyphenated_str.strip("-")
+        await self.location_repo.delete(db_room.location_id)
+        await self.room_repo.delete(db_room.id)
+
+        return None
 
     async def generate_unique_slug(self, name: str, street_address: str) -> str:
         """Generate a unique URL-friendly slug."""
-        base_slug = self.sanitize_input(name)
+        base_slug = sanitize_location_input(name)
 
         if not await self.room_exists_by_url_slug(base_slug):
             return base_slug
 
-        slug_with_address = f"{base_slug}-{self.sanitize_input(street_address)}"
+        slug_with_address = f"{base_slug}-{sanitize_location_input(street_address)}"
         if not await self.room_exists_by_url_slug(slug_with_address):
             return slug_with_address
 

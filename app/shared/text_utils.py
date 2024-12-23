@@ -1,6 +1,8 @@
 import re
 import unicodedata
 
+from unidecode import unidecode
+
 
 def remove_html_tags(text):
     html_pattern = re.compile("<.*?>")
@@ -44,3 +46,22 @@ def sanitize_and_normalize_text(input_text: str) -> str:
     )
 
     return normalized_text
+
+
+def sanitize_location_input(input_str: str) -> str:
+    """
+    Sanitize string to make it URL-safe.
+    Remove non-alphanumeric characters, replace spaces with hyphens,
+    and handle duplicate or leading/trailing hyphens.
+    """
+    # Transliterate Unicode characters to ASCII
+    safe_name = unidecode(input_str)
+
+    # Replace non-alphanumeric characters (except hyphens) with spaces
+    cleaned_str = re.sub(r"[^a-zA-Z0-9\s-]", " ", safe_name)
+
+    # Replace spaces with hyphens, collapse multiple spaces/hyphens into one
+    hyphenated_str = re.sub(r"[\s-]+", "-", cleaned_str).lower()
+
+    # Remove leading and trailing hyphens
+    return hyphenated_str.strip("-")

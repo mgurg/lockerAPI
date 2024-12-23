@@ -8,9 +8,9 @@ from sqlalchemy import BinaryExpression, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.datbase.db import get_db
-from app.datbase.models.models import City, GeoName
-from app.datbase.repository.generics import GenericRepo
+from app.database.db import get_db
+from app.database.models.models import City, GeoName
+from app.database.repository.generics import GenericRepo
 
 UserDB = Annotated[AsyncSession, Depends(get_db)]
 

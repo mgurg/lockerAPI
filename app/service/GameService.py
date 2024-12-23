@@ -12,7 +12,7 @@ from openai import AsyncOpenAI
 from pydantic import BaseModel, IPvAnyAddress
 
 from app.config import get_settings
-from app.datbase.repository.AiGameRepo import AiGameRepo
+from app.database.repository.AiGameRepo import AiGameRepo
 from app.schemas.ai_game import CurrentPuzzleResponse, GameIntro, GameOutro, GameStart, PuzzleResponse, ReviewRequest
 from app.shared.text_utils import sanitize_and_normalize_text
 

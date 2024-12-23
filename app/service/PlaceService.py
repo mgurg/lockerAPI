@@ -7,13 +7,13 @@ from pydantic_extra_types.language_code import LanguageAlpha2
 from starlette.status import HTTP_404_NOT_FOUND
 
 from app.config import get_settings
-from app.datbase.repository.CityRepo import CityRepo
-from app.datbase.repository.GeoNameRepo import GeoNameRepo
-from app.datbase.repository.LocationRepo import LocationRepo
-from app.datbase.repository.RoomRepo import RoomRepo
-from app.datbase.repository.RoomTranslationRepo import RoomTranslationRepo
+from app.database.repository.CityRepo import CityRepo
+from app.database.repository.GeoNameRepo import GeoNameRepo
+from app.database.repository.LocationRepo import LocationRepo
+from app.database.repository.RoomRepo import RoomRepo
+from app.database.repository.RoomTranslationRepo import RoomTranslationRepo
 from app.schemas.requests import PlaceAdd
-from app.service.RoomService import RoomService
+from app.shared.text_utils import sanitize_location_input
 
 settings = get_settings()
 
@@ -34,7 +34,7 @@ class PlaceService:
         self.room_translation_repo = room_translation_repo
 
     async def get_rooms_by_location(self, place_name: str, language: LanguageAlpha2 | None = None):
-        url_safe_place = RoomService.sanitize_input(place_name)
+        url_safe_place = sanitize_location_input(place_name)
         city = await self.city_repo.get_place_by_name(url_safe_place)
         if city is None:
             raise HTTPException(
@@ -82,7 +82,7 @@ class PlaceService:
         places_with_rooms_dict = [
             {
                 "city": city,
-                "ascii_name": RoomService.sanitize_input(city),
+                "ascii_name": sanitize_location_input(city),
                 "state_province": state_province,
                 "room_count": room_count
             }
@@ -112,7 +112,7 @@ class PlaceService:
             geo_name_data = {
                 "city_id": db_city.id,
                 "name": geo_name.name,
-                "name_ascii": RoomService.sanitize_input(geo_name.name),
+                "name_ascii": sanitize_location_input(geo_name.name),
                 "country": place.country,
                 "lang": geo_name.lang,
             }

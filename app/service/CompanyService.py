@@ -7,10 +7,10 @@ from sqlalchemy import Sequence
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from app.config import get_settings
-from app.datbase.models.models import Company
-from app.datbase.repository.CompanyRepo import CompanyRepo
-from app.datbase.repository.DepartmentRepo import DepartmentRepo
-from app.datbase.repository.LocationRepo import LocationRepo
+from app.database.models.models import Company
+from app.database.repository.CompanyRepo import CompanyRepo
+from app.database.repository.DepartmentRepo import DepartmentRepo
+from app.database.repository.LocationRepo import LocationRepo
 from app.schemas.requests import CompanyAdd, DepartmentAdd
 
 settings = get_settings()
