@@ -39,6 +39,7 @@ class RoomAdd(BaseModel):
     mt_id: str | None = None
     location: LocationAdd | None = None
     translation: list[TranslationAdd]
+    supported_languages: list[LanguageAlpha2]
 
 
 class GeoNameAdd(BaseModel):

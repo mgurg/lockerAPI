@@ -1,7 +1,7 @@
 from typing import Optional
 
 import sqlalchemy as sa
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String, func, Table, Column
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -22,12 +22,12 @@ class BaseModel(Base):
     id: Mapped[int] = mapped_column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
 
 
-# room_language_link = Table(
-#     "room_language_link",
-#     Base.metadata,
-#     Column("room_id", sa.Integer, ForeignKey("rooms.id", ondelete="CASCADE"), primary_key=True),
-#     Column("language_id", sa.Integer, ForeignKey("languages.id", ondelete="CASCADE"), primary_key=True)
-# )
+room_language_link = Table(
+    "room_language_link",
+    Base.metadata,
+    Column("room_id", sa.Integer, ForeignKey("rooms.id", ondelete="CASCADE"), primary_key=True),
+    Column("language_id", sa.Integer, ForeignKey("languages.id", ondelete="CASCADE"), primary_key=True)
+)
 
 
 class Location(BaseModel):
@@ -49,8 +49,6 @@ class Location(BaseModel):
 
 class City(BaseModel):
     __tablename__ = "cities"
-    # local_id: Mapped[str]
-    # local_id_type: Mapped[str]
     lat: Mapped[float | None] = mapped_column(Numeric(10, 7))
     lon: Mapped[float | None] = mapped_column(Numeric(10, 7))
     lat_min: Mapped[float | None] = mapped_column(Numeric(10, 7))
@@ -65,7 +63,6 @@ class City(BaseModel):
     # seo_title: Mapped[str | None] = mapped_column(String(100))
     # seo_description: Mapped[str | None] = mapped_column(String(200))
 
-    # rooms: Mapped[list["Room"]] = relationship(back_populates="city")
     geo_names: Mapped[list["GeoName"]] = relationship(back_populates="city")
 
 
@@ -85,7 +82,6 @@ class Room(BaseModel):
 
     uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True))
     url_slug: Mapped[str]
-    # city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"))
     location_id: Mapped[int | None] = mapped_column(ForeignKey("locations.id"))
     company_id: Mapped[int | None] = mapped_column(ForeignKey("companies.id"))
     department_id: Mapped[int | None] = mapped_column(ForeignKey("departments.id"))
@@ -105,24 +101,24 @@ class Room(BaseModel):
     updated_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
     created_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now())
 
-    # city: Mapped["City"] = relationship(back_populates="rooms")
     location: Mapped[Optional["Location"]] = relationship(back_populates="rooms")
     translations: Mapped[list["RoomTranslation"]] = relationship(back_populates="room")
-    # languages: Mapped[list["Language"]] = relationship(secondary="room_language_link", back_populates="rooms")
+    languages: Mapped[list["Language"]] = relationship(secondary="room_language_link", back_populates="rooms")
     # tags: Mapped[List["Tag"]] = relationship(secondary="room_tag", back_populates="rooms")
 
 
-# class Language(Base):
-#     __tablename__ = "languages"
-#
-#     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-#     name: Mapped[str] = mapped_column(String, nullable=False)
-#     code: Mapped[str] = mapped_column(String, nullable=False)
-#
-#     # Many-to-many relationship with Room
-#     rooms: Mapped[list[Room]] = relationship(
-#         secondary=room_language_link, back_populates="languages"
-#     )
+class Language(Base):
+    __tablename__ = "languages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    original_name: Mapped[str] = mapped_column(String, nullable=False)
+    code: Mapped[str] = mapped_column(String, nullable=False)
+
+    # Many-to-many relationship with Room
+    rooms: Mapped[list[Room]] = relationship(
+        secondary=room_language_link, back_populates="languages"
+    )
 
 
 class RoomTranslation(BaseModel):
@@ -155,13 +151,6 @@ class Company(BaseModel):
     updated_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
     created_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now())
 
-    # street_address: Mapped[str | None] = mapped_column(String())
-    # city: Mapped[str | None] = mapped_column(String())
-    # postal_code: Mapped[str | None] = mapped_column(String())
-    # country: Mapped[str | None] = mapped_column(String())
-    # lat: Mapped[float | None] = mapped_column(Numeric(10, 7))
-    # lon: Mapped[float | None] = mapped_column(Numeric(10, 7))
-
     location: Mapped[Optional["Location"]] = relationship(back_populates="companies")
     departments: Mapped[list["Department"]] = relationship(back_populates="company")
 
@@ -173,13 +162,6 @@ class Department(BaseModel):
     name: Mapped[str] = mapped_column(String())
     company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
     location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"))
-    # brand: Mapped[str] = mapped_column(String())
-    # street_address: Mapped[str | None] = mapped_column(String())
-    # city: Mapped[str | None] = mapped_column(String())
-    # postal_code: Mapped[str | None] = mapped_column(String())
-    # country: Mapped[str | None] = mapped_column(String())
-    # lat: Mapped[float | None] = mapped_column(Numeric(10, 7))
-    # lon: Mapped[float | None] = mapped_column(Numeric(10, 7))
 
     company: Mapped["Company"] = relationship(back_populates="departments")
     location: Mapped["Location"] = relationship(back_populates="departments")

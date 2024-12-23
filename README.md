@@ -26,12 +26,12 @@ docker exec -it lockerapi-web .venv/bin/alembic upgrade head
 To roll back the latest migration operation, you may use the `alembic downgrade` command
 
 ```bash
-docker exec -it lockerapi-web .venv/bin/alembic alembic downgrade -1
+docker exec -it lockerapi-web .venv/bin/alembic downgrade -1
 ```
 
 To run rolled back migration again: 
 ```bash
-docker exec -it lockerapi-web .venv/bin/alembic alembic downgrade +1
+docker exec -it lockerapi-web .venv/bin/alembic upgrade +1
 ```
 
 Revision History: Use `.venv/bin/alembic history` to see the history of migrations and understand the steps involved.
@@ -63,7 +63,7 @@ TRUNCATE TABLE locations RESTART IDENTITY CASCADE ;
 
 ### LLM friendly version:
 ```bash
-bunx repomix --ignore "**/*.log,tmp,Readme.md,uv.lock"
+bunx repomix --style markdown --ignore "**/*.log,tmp/,Readme.md,uv.lock"
 ```
 
 ## ADR

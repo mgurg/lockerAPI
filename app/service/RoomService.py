@@ -14,6 +14,7 @@ from app.database.models.models import Room
 from app.database.repository.CityRepo import CityRepo
 from app.database.repository.CompanyRepo import CompanyRepo
 from app.database.repository.DepartmentRepo import DepartmentRepo
+from app.database.repository.LanguageRepo import LanguageRepo
 from app.database.repository.LocationRepo import LocationRepo
 from app.database.repository.RoomRepo import RoomRepo
 from app.database.repository.RoomTranslationRepo import RoomTranslationRepo
@@ -29,7 +30,8 @@ class RoomService:
             location_repo: Annotated[LocationRepo, Depends()],
             company_repo: Annotated[CompanyRepo, Depends()],
             department_repo: Annotated[DepartmentRepo, Depends()],
-            room_translation_repo: Annotated[RoomTranslationRepo, Depends()]
+            room_translation_repo: Annotated[RoomTranslationRepo, Depends()],
+            language_repo: Annotated[LanguageRepo, Depends()]
     ) -> None:
         self.room_repo = room_repo
         self.city_repo = city_repo
@@ -37,6 +39,7 @@ class RoomService:
         self.company_repo = company_repo
         self.department_repo = department_repo
         self.room_translation_repo = room_translation_repo
+        self.language_repo = language_repo
 
     async def get_room_by_uuid(self, room_uuid: UUID) -> Room | None:
         db_room = await self.room_repo.get_by_uuid(room_uuid)
@@ -141,6 +144,8 @@ class RoomService:
         except ValueError as e:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
+        db_languages = await self.language_repo.get_by_codes(room.supported_languages)
+
         room_data = {
             "uuid": str(uuid4()),
             "url_slug": unique_slug,
@@ -156,7 +161,10 @@ class RoomService:
             "mt_id": room.mt_id,
             "company_id": db_company.id,
             "department_id": db_department.id,
+            "languages": db_languages
         }
+
+        print(room_data)
 
         new_db_room = await self.room_repo.create(**room_data)
 
