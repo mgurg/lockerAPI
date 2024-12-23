@@ -10,6 +10,7 @@ from app.controller.companies import company_router
 from app.controller.games import game_router
 from app.controller.places import place_router
 from app.controller.rooms import room_router
+from app.controller.seo import seo_router
 
 settings = get_settings()
 
@@ -40,6 +41,7 @@ def create_application() -> FastAPI:
     app.include_router(place_router, prefix="/places", tags=["PLACE"])
     app.include_router(company_router, prefix="/companies", tags=["COMPANY"])
     app.include_router(game_router, prefix="/games", tags=["GAMES"])
+    app.include_router(seo_router, prefix="/seo", tags=["SEO"])
 
     return app
 
