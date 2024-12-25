@@ -31,7 +31,8 @@ class GeoNameRepo(GenericRepo[GeoName]):
         return result.scalars().all()
 
     async def get_by_country(self, country: str) -> Sequence[GeoName]:
-        query = select(self.Model).where(self.Model.country == country)
+        query = select(self.Model).where(self.Model.country == country).where(self.Model.lang == country)
 
         result = await self.session.execute(query)
         return result.scalars().all()
+    

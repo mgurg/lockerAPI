@@ -118,4 +118,5 @@ class PlaceService:
             }
 
             await self.geo_name_repo.create(**geo_name_data)
+
         return None
