@@ -29,7 +29,8 @@ To roll back the latest migration operation, you may use the `alembic downgrade`
 docker exec -it lockerapi-web .venv/bin/alembic downgrade -1
 ```
 
-To run rolled back migration again: 
+To run rolled back migration again:
+
 ```bash
 docker exec -it lockerapi-web .venv/bin/alembic upgrade +1
 ```
@@ -42,7 +43,9 @@ Detailed View: Use `.venv/bin/alembic show <revision>` to get detailed informati
 ```bash
 uv lock --upgrade
 ```
+
 ### Check & format project
+
 ```bash
 ruff check app/
 ```
@@ -57,21 +60,24 @@ ruff check app/ --fix
 - insert geo data `uv run locations.py`
 
 ### Truncate PG data
+
 ```postgresql
 TRUNCATE TABLE locations RESTART IDENTITY CASCADE ;
 ```
 
-### LLM friendly version:
+### LLM friendly version
+
 ```bash
 bunx repomix --style markdown --ignore "**/*.log,tmp/,Readme.md,uv.lock"
 ```
 
 ## ADR
 
-http://localhost:5000/{language}/{room_name}
-http://localhost:5000/{language}/l/{location}
-http://localhost:5000/{language}/l/{location}/{tag}
-http://localhost:5000/{language}/c/{company_name}
+<http://localhost:5000/{language}/{room_name}>
+<http://localhost:5000/{language}/l/{location}>
+<http://localhost:5000/{language}/l/{location}/{tag}>
+<http://localhost:5000/{language}/c/{company_name}>
 
-## TODO:
- - don't allow to add duplicated departments
+## TODO
+
+- don't allow to add duplicated departments
