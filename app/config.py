@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     PROJECT_DIR: os.PathLike[str] = Path(__file__).parent.parent
     ENVIRONMENT: str | None = os.getenv("APP_ENV", None)
     APP_URL: str = os.getenv("APP_URL")
+    APP_DOMAIN: str = os.getenv("APP_DOMAIN")
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = os.getenv("LOG_LEVEL", "INFO")
 
     DB_POSTGRES_URL: PostgresDsn = "postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}".format(

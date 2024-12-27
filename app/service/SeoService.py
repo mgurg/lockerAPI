@@ -21,7 +21,7 @@ class SeoService:
 
     async def generate(self):
         cities = await self.geo_name_repo.get_by_country_and_lang("PL", "pl")
-        base_url = "https://your-nuxt-app.com"
+        base_url = f"https://{settings.APP_DOMAIN}"
 
         sitemap_content = """<?xml version="1.0" encoding="UTF-8"?>
         <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
