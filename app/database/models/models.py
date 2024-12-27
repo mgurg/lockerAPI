@@ -1,7 +1,7 @@
 from typing import Optional
 
 import sqlalchemy as sa
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String, func, Table, Column
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Numeric, String, Table, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -60,8 +60,8 @@ class City(BaseModel):
     category: Mapped[str] = mapped_column(String(16))
     region: Mapped[str | None] = mapped_column(String(64))
     country: Mapped[str | None] = mapped_column(String(2))
-    # seo_title: Mapped[str | None] = mapped_column(String(100))
-    # seo_description: Mapped[str | None] = mapped_column(String(200))
+    seo_title: Mapped[str | None] = mapped_column(String())
+    seo_description: Mapped[str | None] = mapped_column(String())
 
     geo_names: Mapped[list["GeoName"]] = relationship(back_populates="city")
 
@@ -73,6 +73,7 @@ class GeoName(BaseModel):
     name_ascii: Mapped[str] = mapped_column(String(128))
     country: Mapped[str] = mapped_column(String(2))
     lang: Mapped[str] = mapped_column(String(2))
+    created_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now())
 
     city: Mapped["City"] = relationship(back_populates="geo_names")
 

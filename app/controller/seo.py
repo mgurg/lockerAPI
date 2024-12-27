@@ -11,6 +11,6 @@ seoServiceDependency = Annotated[SeoService, Depends()]
 
 
 @seo_router.get("/sitemap", response_class=Response)
-async def room_by_uuid(seo_service: seoServiceDependency):
+async def loactions_sitemap(seo_service: seoServiceDependency):
     sitemap_content = await seo_service.generate()
     return Response(content=sitemap_content, media_type="application/xml")

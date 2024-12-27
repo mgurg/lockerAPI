@@ -3,10 +3,10 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.db import get_db
 from app.database.models.models import GeoName
@@ -32,9 +32,8 @@ class GeoNameRepo(GenericRepo[GeoName]):
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def get_by_country_and_lang(self, country: CountryAlpha2, lang:LanguageAlpha2) -> Sequence[GeoName]:
+    async def get_by_country_and_lang(self, country: CountryAlpha2, lang: LanguageAlpha2) -> Sequence[GeoName]:
         query = select(self.Model).where(self.Model.country == country).where(self.Model.lang == lang)
 
         result = await self.session.execute(query)
         return result.scalars().all()
-    
