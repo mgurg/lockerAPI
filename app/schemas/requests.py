@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
+from pydantic_extra_types.coordinate import Longitude, Latitude
 
 
 class LocationAdd(BaseModel):
@@ -15,8 +16,8 @@ class LocationAdd(BaseModel):
     country: CountryAlpha2
     located_in: str | None = None
     type: Literal["company", "department", "room"] | None = None
-    lat: float | None = None
-    lon: float | None = None
+    lat: Latitude | None = None
+    lon: Longitude | None = None
 
 
 class TranslationAdd(BaseModel):

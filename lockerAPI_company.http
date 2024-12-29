@@ -14,18 +14,18 @@ Content-Type: application/json
   "gov_id": "string",
   "gov_id_type": "string",
   "website": "string",
-  "email": "string",
+  "email": "mail@mail.pl",
   "phone": "string",
   "location": {
     "street_address": "string",
-    "city": "string",
+    "city": "Warszawa",
     "state_province": "string",
     "postal_code": "string",
-    "country": "Ff",
+    "country": "pl",
     "located_in": "string",
     "type": "company",
-    "lat": 0,
-    "lon": 0
+    "lat": 52.237049,
+    "lon": 21.017532
   }
 }
 
@@ -35,8 +35,8 @@ accept: application/json
 Content-Type: application/json
 
 {
-  "company_uuid": "a64096f2-138c-45af-9966-04358914f831",
-  "name": "Kraków HQ"
+  "company_uuid": "972be3a2-1f1a-41a4-8130-aa8b0f783664",
+  "name": "Warsaw HQ"
 }
 
 ### Create new Department from scratch
