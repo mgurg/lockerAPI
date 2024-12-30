@@ -8,6 +8,7 @@ from starlette.requests import Request
 from starlette.status import HTTP_204_NO_CONTENT
 
 from app.schemas.requests import PlaceAdd
+from app.schemas.responses import CityDetailsResponse
 from app.service.PlaceService import PlaceService
 
 place_router = APIRouter()
@@ -16,26 +17,38 @@ place_router = APIRouter()
 placeServiceDependency = Annotated[PlaceService, Depends()]
 
 
-@place_router.get("/{location_name}")
-async def place_by_name(place_service: placeServiceDependency, location_name: str,
-                        language: LanguageAlpha2 | None = None):
+@place_router.get("")
+async def get_places_with_rooms(place_service: placeServiceDependency, country: CountryAlpha2 | None = None):
+    db_item = await place_service.get_places_with_rooms(country)
+
+    return db_item
+
+
+@place_router.get("/{city_ascii_name}")
+async def details(
+    place_service: placeServiceDependency, city_ascii_name: str, language: LanguageAlpha2, country: CountryAlpha2
+) -> CityDetailsResponse:
+    db_city = await place_service.get_city_details(city_ascii_name, language, country)
+
+    return db_city
+
+
+@place_router.get("/rooms/{location_name}")
+async def get_rooms_by_location(place_service: placeServiceDependency, location_name: str, language: LanguageAlpha2 | None = None):
     db_item = await place_service.get_rooms_by_location(location_name, language)
 
     return db_item
 
 
-@place_router.get("/geoip")
-async def place_by_uuid(place_service: placeServiceDependency, request: Request, x_forwarded_for: Annotated[str | None, Header()] = None,):
+@place_router.get("/rooms/geoip")
+async def get_rooms_by_geolocation(
+    place_service: placeServiceDependency,
+    request: Request,
+    x_forwarded_for: Annotated[str | None, Header()] = None,
+):
     client_ip_str = x_forwarded_for.split(",")[0].strip() if x_forwarded_for else request.client.host
     client_ip = IPvAnyAddress(client_ip_str)
     db_item = await place_service.get_rooms_by_ip(client_ip)
-
-    return db_item
-
-
-@place_router.get("")
-async def places_with_rooms(place_service: placeServiceDependency, country: CountryAlpha2 | None = None):
-    db_item = await place_service.get_places_with_rooms(country)
 
     return db_item
 

@@ -4,6 +4,7 @@ from uuid import UUID
 
 from fastapi import Depends
 from pydantic_extra_types.country import CountryAlpha2
+from pydantic_extra_types.language_code import LanguageAlpha2
 from sqlalchemy import BinaryExpression, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -40,7 +41,7 @@ class CityRepo(GenericRepo[City]):
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_place_by_name(self, place_name: str, language: CountryAlpha2 | None = None):
+    async def get_place_by_name(self, place_name: str, language: LanguageAlpha2 | None = None):
         # Base query with join on the relationship
         query = select(City).join(City.geo_names).where(GeoName.name_ascii == place_name)
 
@@ -59,20 +60,31 @@ class CityRepo(GenericRepo[City]):
 
         return city
 
-    async def get_places_by_bbox(self,
-                                 latitude: float,
-                                 longitude: float,
-                                 load_relations: list[str | BinaryExpression] = None
-                                 ) -> Sequence[City]:
-        query = (
-            select(self.Model)
-            .where(
-                (self.Model.lat_min <= latitude) &
-                (self.Model.lat_max >= latitude) &
-                (self.Model.lon_min <= longitude) &
-                (self.Model.lon_max >= longitude)
-            )
+    async def get_places_by_bbox(
+        self, latitude: float, longitude: float, load_relations: list[str | BinaryExpression] = None
+    ) -> Sequence[City]:
+        query = select(self.Model).where(
+            (self.Model.lat_min <= latitude)
+            & (self.Model.lat_max >= latitude)
+            & (self.Model.lon_min <= longitude)
+            & (self.Model.lon_max >= longitude)
         )
         query = self._apply_relationship_loading(query, load_relations)
         result = await self.session.execute(query)
         return result.scalars().all()
+
+    async def get_details_by_ascii_name(self, name_ascii: str, language: LanguageAlpha2, country: CountryAlpha2):
+        query = (
+            select(City, GeoName)
+            .join(GeoName, GeoName.city_id == City.id)
+            .where(
+                GeoName.country == country,
+                GeoName.name_ascii == name_ascii,
+                GeoName.lang == language
+            )
+        )
+
+        result = await self.session.execute(query)
+        city_and_name = result.first()
+
+        return city_and_name

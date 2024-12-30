@@ -52,8 +52,8 @@ class RoomRepo(GenericRepo[Room]):
 
     async def get_by_bbox(
             self, min_lon: float, max_lon: float, min_lat: float, max_lat: float,
-            load_relations: list[str | BinaryExpression], offset: int, limit: int,
-            sort_column: str, sort_order: str
+            load_relations: list[str | BinaryExpression], offset: int | None = None, limit: int | None = None,
+            sort_column: str | None = None, sort_order: str | None = None
     ) -> tuple[Sequence[Room], int]:
         # bbox = left,bottom,right,top
         # bbox = min Longitude , min Latitude , max Longitude , max Latitude

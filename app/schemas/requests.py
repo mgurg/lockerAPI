@@ -3,9 +3,9 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
+from pydantic_extra_types.coordinate import Latitude, Longitude
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
-from pydantic_extra_types.coordinate import Longitude, Latitude
 
 
 class LocationAdd(BaseModel):

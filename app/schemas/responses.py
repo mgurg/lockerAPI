@@ -60,3 +60,21 @@ class CompaniesPaginated(BaseResponse):
     count: int
     limit: int
     offset: int
+
+
+class CityDetailsResponse(BaseResponse):
+    city_name: str
+    city_name_inflect: str
+    lat: float
+    lon: float
+    lat_min: float
+    lon_min: float
+    lat_max: float
+    lon_max: float
+    population: int
+    importance: float
+    category: str | None = None
+    region: str | None = None
+    country: str | None = None
+    seo_title: str | None = None
+    seo_description: str | None = None

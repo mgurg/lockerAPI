@@ -29,7 +29,7 @@ class SeoService:
         for city in cities:
             # Use the city's created_at field for the lastmod
             lastmod = city.created_at.strftime("%Y-%m-%d") if city.created_at else datetime.now().strftime("%Y-%m-%d")
-            url = f"{base_url}/l/{city.name_ascii}"
+            url = f"{base_url}/escape-room/{city.name_ascii}"
             sitemap_content += f"""    <url>
         <loc>{url}</loc>
         <lastmod>{lastmod}</lastmod>

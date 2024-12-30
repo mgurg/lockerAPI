@@ -35,6 +35,4 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> BaseSettings:
-    # path = Path(__file__).parent.parent / "app" / ".env.testing"
-    # return Settings(_env_file=path.as_posix(), _env_file_encoding="utf-8")
     return Settings()

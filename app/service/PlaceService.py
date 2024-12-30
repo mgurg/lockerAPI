@@ -13,6 +13,7 @@ from app.database.repository.LocationRepo import LocationRepo
 from app.database.repository.RoomRepo import RoomRepo
 from app.database.repository.RoomTranslationRepo import RoomTranslationRepo
 from app.schemas.requests import PlaceAdd
+from app.shared.city_inflect import PolishCityInflector
 from app.shared.text_utils import sanitize_location_input
 
 settings = get_settings()
@@ -20,12 +21,12 @@ settings = get_settings()
 
 class PlaceService:
     def __init__(
-            self,
-            room_repo: Annotated[RoomRepo, Depends()],
-            city_repo: Annotated[CityRepo, Depends()],
-            geo_name_repo: Annotated[GeoNameRepo, Depends()],
-            location_repo: Annotated[LocationRepo, Depends()],
-            room_translation_repo: Annotated[RoomTranslationRepo, Depends()]
+        self,
+        room_repo: Annotated[RoomRepo, Depends()],
+        city_repo: Annotated[CityRepo, Depends()],
+        geo_name_repo: Annotated[GeoNameRepo, Depends()],
+        location_repo: Annotated[LocationRepo, Depends()],
+        room_translation_repo: Annotated[RoomTranslationRepo, Depends()],
     ) -> None:
         self.room_repo = room_repo
         self.city_repo = city_repo
@@ -33,23 +34,47 @@ class PlaceService:
         self.location_repo = location_repo
         self.room_translation_repo = room_translation_repo
 
+    async def get_city_details(self, city_ascii_name: str, language: LanguageAlpha2, country: CountryAlpha2):
+        city_and_name = await self.city_repo.get_details_by_ascii_name(city_ascii_name, language, country)
+        if city_and_name is None:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"City `{city_ascii_name}` in {country} for {language} not found!")
+
+        # Example usage
+
+        if city_and_name:
+            city, geo_name = city_and_name
+
+            return {
+                "city_name": geo_name.name,
+                "city_name_inflect": PolishCityInflector().inflect(geo_name.name, "locative"),
+                "lat": city.lat,
+                "lon": city.lon,
+                "lat_min": city.lat_min,
+                "lon_min": city.lon_min,
+                "lat_max": city.lat_max,
+                "lon_max": city.lon_max,
+                "population": city.population,
+                "importance": city.importance,
+                "category": city.category,
+                "region": city.region,
+                "country": city.country,
+                "seo_title": city.seo_title,
+                "seo_description": city.seo_description,
+            }
+
+        return None
+
     async def get_rooms_by_location(self, place_name: str, language: LanguageAlpha2 | None = None):
         url_safe_place = sanitize_location_input(place_name)
         city = await self.city_repo.get_place_by_name(url_safe_place)
         if city is None:
-            raise HTTPException(
-                status_code=HTTP_404_NOT_FOUND,
-                detail=f"Place `{place_name}` as: `{url_safe_place}` not found!"
-            )
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Place `{place_name}` as: `{url_safe_place}` not found!")
 
         print(city.lon_min, city.lon_max, city.lat_min, city.lat_max)
-        rooms = await self.room_repo.get_by_bbox(
-            city.lon_min,
-            city.lon_max,
-            city.lat_min,
-            city.lat_max,
-            ["translations"]
-        )
+        rooms, counter = await self.room_repo.get_by_bbox(city.lon_min, city.lon_max, city.lat_min, city.lat_max, ["translations"])
+
+        if counter == 0:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Locations `{place_name}` as: `{url_safe_place}` has no ER rooms")
 
         lang_code = language
         for room in rooms:
@@ -80,12 +105,7 @@ class PlaceService:
         places = await self.location_repo.get_places_with_rooms(country)
 
         places_with_rooms_dict = [
-            {
-                "city": city,
-                "ascii_name": sanitize_location_input(city),
-                "state_province": state_province,
-                "room_count": room_count
-            }
+            {"city": city, "ascii_name": sanitize_location_input(city), "state_province": state_province, "room_count": room_count}
             for city, state_province, room_count in places
         ]
 
