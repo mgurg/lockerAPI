@@ -45,41 +45,40 @@ class RoomRepo(GenericRepo[Room]):
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_by_location_and_language(self, slug: str, lang_code: str,
-                                           load_relations: list[str | BinaryExpression] = None) -> Room | None:
-
-        ...
+    async def get_by_location_and_language(
+        self, slug: str, lang_code: str, load_relations: list[str | BinaryExpression] = None
+    ) -> Room | None: ...
 
     async def get_by_bbox(
-            self, min_lon: float, max_lon: float, min_lat: float, max_lat: float,
-            load_relations: list[str | BinaryExpression], offset: int | None = None, limit: int | None = None,
-            sort_column: str | None = None, sort_order: str | None = None
+        self,
+        min_lon: float,
+        max_lon: float,
+        min_lat: float,
+        max_lat: float,
+        load_relations: list[str | BinaryExpression],
+        offset: int | None = None,
+        limit: int | None = None,
+        sort_column: str | None = None,
+        sort_order: str | None = None,
     ) -> tuple[Sequence[Room], int]:
         # bbox = left,bottom,right,top
         # bbox = min Longitude , min Latitude , max Longitude , max Latitude
 
         location_subquery = (
             select(Location.id)
-            .where(
-                (Location.lon >= min_lon) & (Location.lon <= max_lon),
-                (Location.lat >= min_lat) & (Location.lat <= max_lat)
-            ).subquery()
+            .where((Location.lon >= min_lon) & (Location.lon <= max_lon), (Location.lat >= min_lat) & (Location.lat <= max_lat))
+            .subquery()
         )
 
         # Join the rooms with the locations subquery
-        query = (
-            select(self.Model)
-            .join(location_subquery, self.Model.location_id == location_subquery.c.id)
-        )
+        query = select(self.Model).join(location_subquery, self.Model.location_id == location_subquery.c.id)
 
         query = self._apply_relationship_loading(query, load_relations)
         result = await self.session.execute(query.offset(offset).limit(limit))
 
         total_records: int = 0
 
-        count_statement = (
-            select(func.count(self.Model.id))
-        )
+        count_statement = select(func.count(self.Model.id))
         count_result = await self.session.execute(count_statement)
         counter = count_result.scalar_one_or_none()
         if counter:
@@ -87,18 +86,20 @@ class RoomRepo(GenericRepo[Room]):
 
         return result.scalars().all(), total_records
 
-    async def get_nearby_rooms(self, lat: float, lon: float, load_relations: list[str | BinaryExpression] = None) -> \
-            Sequence[Room]:
+    async def get_nearby_rooms(self, lat: float, lon: float, load_relations: list[str | BinaryExpression] = None) -> Sequence[Room]:
         # Haversine formula to calculate distance
         query = (
             select(self.Model)
             .join(Location, self.Model.location_id == Location.id)
             .where(
                 func.acos(
-                    func.sin(func.radians(lat)) * func.sin(func.radians(Location.lat)) +
-                    func.cos(func.radians(lat)) * func.cos(func.radians(Location.lat)) *
-                    func.cos(func.radians(Location.lon) - func.radians(lon))
-                ) * 6371 <= 400  # Distance in kilometers (10 km radius)
+                    func.sin(func.radians(lat)) * func.sin(func.radians(Location.lat))
+                    + func.cos(func.radians(lat))
+                    * func.cos(func.radians(Location.lat))
+                    * func.cos(func.radians(Location.lon) - func.radians(lon))
+                )
+                * 6371
+                <= 400  # Distance in kilometers (10 km radius)
             )
             .limit(20)
         )
@@ -107,8 +108,7 @@ class RoomRepo(GenericRepo[Room]):
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def get_by_url_slug_and_lang(self, slug: str, lang_code: str,
-                                       load_relations: list[str | BinaryExpression] = None) -> Room | None:
+    async def get_by_url_slug_and_lang(self, slug: str, lang_code: str, load_relations: list[str | BinaryExpression] = None) -> Room | None:
         # Solution 1
         query = (
             select(self.Model)
@@ -133,3 +133,8 @@ class RoomRepo(GenericRepo[Room]):
 
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
+
+    async def get_number_of_rooms(self) -> int:
+        query = select(func.count()).select_from(self.Model)
+        result = await self.session.execute(query)
+        return result.scalar()

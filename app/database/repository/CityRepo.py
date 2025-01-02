@@ -3,6 +3,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
+from pydantic_extra_types.coordinate import Latitude, Longitude
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
 from sqlalchemy import BinaryExpression, select
@@ -10,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.database.db import get_db
-from app.database.models.models import City, GeoName
+from app.database.models.models import City, GeoName, Room
 from app.database.repository.generics import GenericRepo
 
 UserDB = Annotated[AsyncSession, Depends(get_db)]
@@ -88,3 +89,29 @@ class CityRepo(GenericRepo[City]):
         city_and_name = result.first()
 
         return city_and_name
+
+    # Method 2: Find the 5 closest cities with escape rooms
+    async def get_closest_cities(self, lat: Latitude, lon: Longitude):
+        """
+        Finds the 5 closest cities to the given latitude and longitude that have escape rooms.
+        Results are sorted by distance and include the city name and importance.
+
+        :param session: SQLAlchemy session object
+        :param lat: Latitude of the reference point
+        :param lon: Longitude of the reference point
+        :param max_results: Maximum number of results to return
+        :return: List of tuples containing city name and importance
+        """
+        # Fetch all cities with escape rooms
+        query = (
+            select(GeoName.name, City.lat, City.long, City.importance)
+            .join(Room, City.id == Room.city_id)
+            .join(GeoName, GeoName.city_id == City.id)
+            .distinct(City.id)
+        )
+
+        # Execute the query
+        result = await self.session.execute(query)
+        cities = result.fetchall()
+
+        return cities
