@@ -1,10 +1,9 @@
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query
-from starlette.status import HTTP_204_NO_CONTENT
 
 from app.schemas.requests import CompanyAdd, DepartmentAdd
-from app.schemas.responses import CompaniesPaginated
+from app.schemas.responses import BaseUuid, CompaniesPaginated
 from app.service.CompanyService import CompanyService
 
 company_router = APIRouter()
@@ -25,13 +24,13 @@ async def get_companies(
     return CompaniesPaginated(data=db_companies, count=count, offset=offset, limit=limit)
 
 
-@company_router.post("", status_code=HTTP_204_NO_CONTENT)
-async def add_company(company_service: companyServiceDependency, company: CompanyAdd):
-    await company_service.create_company(company)
-    return None
+@company_router.post("")
+async def add_company(company_service: companyServiceDependency, company: CompanyAdd) -> BaseUuid:
+    db_company = await company_service.create_company(company)
+    return db_company.uuid
 
 
-@company_router.post("/department", status_code=HTTP_204_NO_CONTENT)
-async def add_company_department(company_service: companyServiceDependency, department: DepartmentAdd):
-    await company_service.create_department(department)
-    return None
+@company_router.post("/department")
+async def add_company_department(company_service: companyServiceDependency, department: DepartmentAdd) -> BaseUuid:
+    db_department = await company_service.create_department(department)
+    return db_department.uuid

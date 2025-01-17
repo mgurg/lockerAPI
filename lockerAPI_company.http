@@ -18,7 +18,7 @@ Content-Type: application/json
   "phone": "string",
   "location": {
     "street_address": "string",
-    "city": "Warszawa",
+    "city": "Kraków",
     "state_province": "string",
     "postal_code": "string",
     "country": "pl",
@@ -36,7 +36,7 @@ Content-Type: application/json
 
 {
   "company_uuid": "972be3a2-1f1a-41a4-8130-aa8b0f783664",
-  "name": "Warsaw HQ"
+  "name": "Kraków HQ"
 }
 
 ### Create new Department from scratch

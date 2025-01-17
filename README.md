@@ -44,6 +44,12 @@ Detailed View: Use `.venv/bin/alembic show <revision>` to get detailed informati
 uv lock --upgrade
 ```
 
+clean cache
+
+```bash
+uv cache clean
+```
+
 ### Check & format project
 
 ```bash

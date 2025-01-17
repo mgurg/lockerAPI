@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException
 from pydantic import IPvAnyAddress
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
-from starlette.status import HTTP_404_NOT_FOUND
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from app.config import get_settings
 from app.database.repository.CityRepo import CityRepo
@@ -62,7 +62,7 @@ class PlaceService:
                 "seo_description": city.seo_description,
             }
 
-        return None
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"Name for `{city_ascii_name}` in {country} for {language} not found!")
 
     async def get_rooms_by_location(self, place_name: str, language: LanguageAlpha2 | None = None):
         url_safe_place = sanitize_location_input(place_name)

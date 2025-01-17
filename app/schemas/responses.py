@@ -78,3 +78,7 @@ class CityDetailsResponse(BaseResponse):
     country: str | None = None
     seo_title: str | None = None
     seo_description: str | None = None
+
+
+class BaseUuid(BaseResponse):
+    uuid: UUID
