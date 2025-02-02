@@ -99,14 +99,16 @@ class Room(BaseModel):
     lm_id: Mapped[str | None]
     mt_id: Mapped[str | None]
     order: Mapped[str | None]
-    verified_at: Mapped[DateTime | None] = mapped_column(DateTime())
-    opened_at: Mapped[DateTime | None] = mapped_column(DateTime())
-    suspended_at: Mapped[DateTime | None] = mapped_column(DateTime())
-    closed_at: Mapped[DateTime | None] = mapped_column(DateTime())
+    # verified_at: Mapped[DateTime | None] = mapped_column(DateTime())
+    # opened_at: Mapped[DateTime | None] = mapped_column(DateTime())
+    # suspended_at: Mapped[DateTime | None] = mapped_column(DateTime())
+    # closed_at: Mapped[DateTime | None] = mapped_column(DateTime())
     updated_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
     created_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now())
 
     location: Mapped[Optional["Location"]] = relationship(back_populates="rooms")
+    company: Mapped[Optional["Company"]] = relationship("Company", back_populates="rooms")
+    department: Mapped[Optional["Department"]] = relationship("Department", back_populates="rooms")
     translations: Mapped[list["RoomTranslation"]] = relationship(back_populates="room")
     languages: Mapped[list["Language"]] = relationship(secondary="room_language_link", back_populates="rooms")
     # tags: Mapped[List["Tag"]] = relationship(secondary="room_tag", back_populates="rooms")
@@ -158,6 +160,7 @@ class Company(BaseModel):
 
     location: Mapped[Optional["Location"]] = relationship(back_populates="companies")
     departments: Mapped[list["Department"]] = relationship(back_populates="company")
+    rooms: Mapped[list["Room"]] = relationship("Room", back_populates="company")
 
 
 class Department(BaseModel):
@@ -170,6 +173,7 @@ class Department(BaseModel):
 
     company: Mapped["Company"] = relationship(back_populates="departments")
     location: Mapped["Location"] = relationship(back_populates="departments")
+    rooms: Mapped[list["Room"]] = relationship("Room", back_populates="department")
 
 
 class AiGame(BaseModel):

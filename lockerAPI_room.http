@@ -36,6 +36,11 @@ Content-Type: application/json
 }
 
 ### Create new room
+GET http://0.0.0.0:5000/rooms/7e79294a-2440-4fa6-b260-0c7fa3ce89eb
+accept: application/json
+Content-Type: application/json
+
+### Create new room
 POST http://0.0.0.0:5000/rooms
 accept: application/json
 Content-Type: application/json
