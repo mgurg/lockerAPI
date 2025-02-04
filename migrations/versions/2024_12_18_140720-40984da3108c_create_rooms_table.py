@@ -44,6 +44,7 @@ def upgrade() -> None:
         sa.Column("opened_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("suspended_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("closed_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
+        sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['location_id'], ['locations.id'], ),
         sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ),

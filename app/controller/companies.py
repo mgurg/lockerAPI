@@ -27,10 +27,10 @@ async def get_companies(
 @company_router.post("")
 async def add_company(company_service: companyServiceDependency, company: CompanyAdd) -> BaseUuid:
     db_company = await company_service.create_company(company)
-    return db_company.uuid
+    return BaseUuid(uuid=db_company.uuid)
 
 
 @company_router.post("/department")
 async def add_company_department(company_service: companyServiceDependency, department: DepartmentAdd) -> BaseUuid:
     db_department = await company_service.create_department(department)
-    return db_department.uuid
+    return BaseUuid(uuid=db_department.uuid)

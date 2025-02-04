@@ -72,3 +72,12 @@ class CompanyRepo(GenericRepo[Company]):
 
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
+
+    async def gef_first_unverified(self, load_relations: list[str] | str = None) -> Company:
+        query = (
+            select(self.Model).where(self.Model.verified_at.is_(None))
+        )
+        query = self._apply_relationship_loading(query, load_relations)
+
+        result = await self.session.execute(query)
+        return result.scalars().first()

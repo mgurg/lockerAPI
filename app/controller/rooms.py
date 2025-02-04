@@ -51,7 +51,6 @@ async def rooms_by_location(
     )
 
     return RoomsPaginated(data=db_rooms, count=count, offset=offset, limit=limit)
-    # return db_rooms
 
 
 @room_router.post("/department")

@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
 from app.config import get_settings
+from app.controller.cc import cc_router
 from app.controller.companies import company_router
 from app.controller.games import game_router
 from app.controller.places import place_router
@@ -42,6 +43,7 @@ def create_application() -> FastAPI:
     app.include_router(company_router, prefix="/companies", tags=["COMPANY"])
     app.include_router(game_router, prefix="/games", tags=["GAMES"])
     app.include_router(seo_router, prefix="/seo", tags=["SEO"])
+    app.include_router(cc_router, prefix="/cc", tags=["C&C"])
 
     return app
 

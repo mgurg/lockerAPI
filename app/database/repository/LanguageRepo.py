@@ -17,7 +17,7 @@ class LanguageRepo(GenericRepo[Language]):
         self.Model = Language
         super().__init__(session, self.Model)
 
-    async def get_by_codes(self, codes: list[LanguageAlpha2]) -> list[Language]:
+    async def get_by_codes(self, codes: list[LanguageAlpha2]):
         query = select(self.Model).where(self.Model.code.in_(codes))
 
         result = await self.session.execute(query)

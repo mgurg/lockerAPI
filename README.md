@@ -69,6 +69,9 @@ ruff check app/ --fix
 
 ```postgresql
 TRUNCATE TABLE locations RESTART IDENTITY CASCADE ;
+TRUNCATE TABLE companies RESTART IDENTITY CASCADE ;
+TRUNCATE TABLE departments RESTART IDENTITY CASCADE ;
+TRUNCATE TABLE rooms RESTART IDENTITY CASCADE ;
 ```
 
 ### LLM friendly version

@@ -39,11 +39,11 @@ class Location(BaseResponse):
 class RoomIndexResponse(BaseResponse):
     uuid: UUID
     url_slug: str
-    reservation_url: str
-    players_min: int
-    players_max: int
-    price_from: float
-    game_duration: int
+    reservation_url: str | None
+    players_min: int | None
+    players_max: int | None
+    price_from: float | None
+    game_duration: int | None
     location: Location
     translation: RoomTranslation | None = None
 

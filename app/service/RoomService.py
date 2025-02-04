@@ -114,6 +114,7 @@ class RoomService:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST,
                                 detail=f"Department `{room.department_uuid}` not found!")
         location = db_department.location
+        db_languages = await self.language_repo.get_by_codes(room.supported_languages)
 
         location_data = {
             "street_address": room.location.street_address if room.location else location.street_address,
@@ -139,12 +140,11 @@ class RoomService:
             logger.warning(
                 f"No lat/long data for `{room.name}`: {location_data["street_address"]}, {location_data["city"]}")
         try:
-            unique_slug = await self.generate_unique_slug(room.name, translation.name)
+            unique_slug = await self.generate_unique_slug(room.name, "XXXX")
 
         except ValueError as e:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
-        db_languages = await self.language_repo.get_by_codes(room.supported_languages)
 
         room_data = {
             "uuid": str(uuid4()),
@@ -163,8 +163,6 @@ class RoomService:
             "department_id": db_department.id,
             "languages": db_languages
         }
-
-        print(room_data)
 
         new_db_room = await self.room_repo.create(**room_data)
 
@@ -196,15 +194,15 @@ class RoomService:
 
         return None
 
-    async def generate_unique_slug(self, name: str, street_address: str) -> str:
+    async def generate_unique_slug(self, name: str, city: str) -> str:
         """Generate a unique URL-friendly slug."""
         base_slug = sanitize_location_input(name)
 
         if not await self.room_exists_by_url_slug(base_slug):
             return base_slug
 
-        slug_with_address = f"{base_slug}-{sanitize_location_input(street_address)}"
+        slug_with_address = f"{base_slug}-{sanitize_location_input(city)}"
         if not await self.room_exists_by_url_slug(slug_with_address):
             return slug_with_address
 
-        raise ValueError(f"Unable to generate a unique slug for room '{name}' at '{street_address}'")
+        raise ValueError(f"Unable to generate a unique slug for room '{name}' at '{city}'")

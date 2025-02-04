@@ -99,10 +99,10 @@ class Room(BaseModel):
     lm_id: Mapped[str | None]
     mt_id: Mapped[str | None]
     order: Mapped[str | None]
-    # verified_at: Mapped[DateTime | None] = mapped_column(DateTime())
-    # opened_at: Mapped[DateTime | None] = mapped_column(DateTime())
-    # suspended_at: Mapped[DateTime | None] = mapped_column(DateTime())
-    # closed_at: Mapped[DateTime | None] = mapped_column(DateTime())
+    verified_at: Mapped[DateTime | None] = mapped_column(DateTime())
+    opened_at: Mapped[DateTime | None] = mapped_column(DateTime())
+    suspended_at: Mapped[DateTime | None] = mapped_column(DateTime())
+    closed_at: Mapped[DateTime | None] = mapped_column(DateTime())
     updated_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
     created_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now())
 
