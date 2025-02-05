@@ -145,7 +145,6 @@ class RoomService:
         except ValueError as e:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
-
         room_data = {
             "uuid": str(uuid4()),
             "url_slug": unique_slug,

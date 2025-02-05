@@ -2,7 +2,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import BinaryExpression, select
+from sqlalchemy import BinaryExpression, Sequence, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -38,3 +38,10 @@ class DepartmentRepo(GenericRepo[Department]):
 
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
+
+    async def get_by_uuids(self, uuids: list[UUID], load_relations: list[str] | str = None) -> Sequence[Department]:
+        query = select(self.Model).where(self.Model.uuid.in_(uuids))
+        query = self._apply_relationship_loading(query, load_relations)
+
+        result = await self.session.execute(query)
+        return result.scalars().all()

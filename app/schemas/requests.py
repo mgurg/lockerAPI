@@ -78,4 +78,20 @@ class CompanyAdd(BaseModel):
 class DepartmentAdd(BaseModel):
     company_uuid: UUID
     name: str
-    location: LocationAdd | None = None
+    location: LocationAdd
+
+
+class LocationEdit(BaseModel):
+    street_address: str | None = None
+    city: str | None = None
+    state_province: str | None = None
+    postal_code: str | None = None
+    country: CountryAlpha2
+    located_in: str | None = None
+    lat: Latitude | None = None
+    lon: Longitude | None = None
+
+
+class DepartmentEdit(BaseModel):
+    name: str| None = None
+    location: LocationEdit | None = None

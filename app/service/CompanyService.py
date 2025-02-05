@@ -1,17 +1,18 @@
 from datetime import UTC, datetime
 from typing import Annotated
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from fastapi import Depends, HTTPException
+from loguru import logger
 from sqlalchemy import Sequence
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_400_BAD_REQUEST
 
 from app.config import get_settings
-from app.database.models.models import Company
+from app.database.models.models import Company, Department, Location
 from app.database.repository.CompanyRepo import CompanyRepo
 from app.database.repository.DepartmentRepo import DepartmentRepo
 from app.database.repository.LocationRepo import LocationRepo
-from app.schemas.requests import CompanyAdd, DepartmentAdd
+from app.schemas.requests import CompanyAdd, DepartmentAdd, DepartmentEdit
 
 settings = get_settings()
 
@@ -76,30 +77,82 @@ class CompanyService:
         return new_db_company
 
     async def create_department(self, department: DepartmentAdd):
-        db_company = await self.company_repo.get_by_uuid(department.company_uuid, ["location"])
+        db_company = await self.company_repo.get_by_uuid(department.company_uuid, ["departments"])
         if not db_company:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND,
                                 detail=f"Company `{department.company_uuid}` not found!")
 
-        location = db_company.location
-        location_data = {
-            "street_address": department.location.street_address if department.location else location.street_address,
-            "city": department.location.city if department.location else location.city,
-            "state_province": department.location.state_province if department.location else location.state_province,
-            "postal_code": department.location.postal_code if department.location else location.postal_code,
-            "country": department.location.country if department.location else location.country,
-            "lat": department.location.lat if department.location else location.lat,
-            "lon": department.location.lon if department.location else location.lon,
-            "type": "department"
-        }
-        db_location = await self.location_repo.create(**location_data)
+        departments_names = [department.name for department in db_company.departments]
+        if department.name in departments_names:
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST,
+                                detail=f"Name `{department.name}` already in use for company `{department.company_uuid}`")
 
         department_data = {
-            "uuid": str(uuid4()),
-            "company": db_company,
-            "location": db_location,
-            "name": department.name,
-        }
+                "uuid": str(uuid4()),
+                "name": department.name,
+                "company": db_company,
+            }
 
-        new_db_department = await self.department_repo.create(**department_data)
-        return new_db_department
+        if department.location:
+            location_data = department.location.model_dump(exclude_unset=True)
+            new_location = await self.location_repo.create(**location_data)
+            department_data["location"] = new_location
+
+            # Create the new department
+        new_department = await self.department_repo.create(**department_data)
+
+        return new_department
+
+    async def delete_department(self, department_uuid: UUID):
+        db_department = await self.department_repo.get_by_uuid(department_uuid, ["location"])
+        if not db_department:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+                                detail=f"Company `{department_uuid}` not found!")
+        if db_department.location:
+            await self.location_repo.delete(db_department.location.id)
+
+        # Delete the department
+        await self.department_repo.delete(db_department.id)
+
+        logger.info(f"Department `{department_uuid}` and its related location have been deleted.")
+
+        return None
+
+    async def update_department(self, department_uuid: UUID, department_data: DepartmentEdit):
+        db_department = await self.department_repo.get_by_uuid(department_uuid, ["location"])
+        if not db_department:
+            raise HTTPException(
+                status_code=HTTP_404_NOT_FOUND,
+                detail=f"Department with UUID {department_uuid} not found"
+            )
+
+        update_data = department_data.model_dump(exclude_unset=True)
+
+        # Handle location updates separately
+        if "location" in update_data and update_data["location"] is not None:
+            location_data = update_data.pop("location")  # Extract location data
+            if db_department.location:  # If the department already has a location
+                for key, value in location_data.items():
+                    setattr(db_department.location, key, value)  # Update existing location object
+
+        await self.department_repo.update(db_department.id, **update_data)
+
+    async def get_department(self, department_uuid: UUID):
+        db_department = await self.department_repo.get_by_uuid(department_uuid, ["location"])
+        if not db_department:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+                                detail=f"Department `{department_uuid}` not found!")
+
+        return db_department
+
+    async def get_company_departments(self, company_uuid: UUID):
+        db_company = await self.company_repo.get_by_uuid(company_uuid, ["departments"])
+        if not db_company:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+                                detail=f"Department `{company_uuid}` not found!")
+
+        departments_uuids = [department.uuid for department in db_company.departments]
+
+        db_departments = await self.department_repo.get_by_uuids(departments_uuids, ["location"])
+
+        return db_departments
