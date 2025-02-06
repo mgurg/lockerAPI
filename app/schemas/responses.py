@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
@@ -13,18 +14,6 @@ class StandardResponse(BaseResponse):
     ok: bool
 
 
-class CompanyIndexResponse(BaseResponse):
-    uuid: UUID
-    name: str
-
-
-class RoomTranslation(BaseResponse):
-    lang: LanguageAlpha2
-    title: str
-    lead: str
-    description: str
-
-
 class Location(BaseResponse):
     street_address: str
     city: str
@@ -34,6 +23,36 @@ class Location(BaseResponse):
     located_in: str | None = None
     lat: float | None = None
     lon: float | None = None
+
+
+class BasicLocation(BaseResponse):
+    city: str | None
+
+
+class BasicDepartment(BaseResponse):
+    uuid: UUID
+    name: str
+
+
+class BasicRoom(BaseResponse):
+    uuid: UUID
+    name: str
+
+
+class CompanyIndexResponse(BaseResponse):
+    uuid: UUID
+    name: str
+    verified_at: datetime | None
+    location: BasicLocation | None
+    departments: list[BasicDepartment] | None
+    rooms: list[BasicRoom] | None
+
+
+class RoomTranslation(BaseResponse):
+    lang: LanguageAlpha2
+    title: str
+    lead: str
+    description: str
 
 
 class RoomIndexResponse(BaseResponse):

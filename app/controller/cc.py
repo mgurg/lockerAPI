@@ -10,6 +10,6 @@ commandServiceDependency = Annotated[CommandService, Depends()]
 
 
 @cc_router.get("/company")
-async def get_first_unverified_company(command_service: commandServiceDependency,):
+async def get_first_unverified_company(command_service: commandServiceDependency):
     db_company = await command_service.get_first_unverified_company()
     return db_company

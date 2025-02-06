@@ -20,6 +20,17 @@ class LocationAdd(BaseModel):
     lon: Longitude | None = None
 
 
+class LocationEdit(BaseModel):
+    street_address: str | None = None
+    city: str | None = None
+    state_province: str | None = None
+    postal_code: str | None = None
+    country: CountryAlpha2
+    located_in: str | None = None
+    lat: Latitude | None = None
+    lon: Longitude | None = None
+
+
 class TranslationAdd(BaseModel):
     lang: LanguageAlpha2
     title: str
@@ -75,23 +86,24 @@ class CompanyAdd(BaseModel):
     location: LocationAdd
 
 
+class CompanyEdit(BaseModel):
+    name: str | None = None
+    brand: str | None = None
+    gov_id: str | None = None
+    gov_id_type: str | None = None
+    place_id: str | None = None
+    website: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    location: LocationEdit | None = None
+
+
 class DepartmentAdd(BaseModel):
     company_uuid: UUID
     name: str
     location: LocationAdd
 
 
-class LocationEdit(BaseModel):
-    street_address: str | None = None
-    city: str | None = None
-    state_province: str | None = None
-    postal_code: str | None = None
-    country: CountryAlpha2
-    located_in: str | None = None
-    lat: Latitude | None = None
-    lon: Longitude | None = None
-
-
 class DepartmentEdit(BaseModel):
-    name: str| None = None
+    name: str | None = None
     location: LocationEdit | None = None

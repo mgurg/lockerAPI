@@ -41,12 +41,13 @@ class CompanyRepo(GenericRepo[Company]):
         return result.scalar_one_or_none()
 
     async def get_companies(
-            self, offset: int, limit: int, sort_column: str, sort_order: str, search: str | None = None
+            self, offset: int, limit: int, sort_column: str, sort_order: str, search: str | None = None, load_relations: list[str] | str = None
     ) -> tuple[Sequence[Company], int]:
         query = (
             select(self.Model)
             .order_by(text(f"{sort_column} {sort_order}"))
         )
+        query = self._apply_relationship_loading(query, load_relations)
 
         search_filters = []
         if search is not None:

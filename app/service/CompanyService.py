@@ -12,7 +12,7 @@ from app.database.models.models import Company, Department, Location
 from app.database.repository.CompanyRepo import CompanyRepo
 from app.database.repository.DepartmentRepo import DepartmentRepo
 from app.database.repository.LocationRepo import LocationRepo
-from app.schemas.requests import CompanyAdd, DepartmentAdd, DepartmentEdit
+from app.schemas.requests import CompanyAdd, DepartmentAdd, DepartmentEdit, CompanyEdit
 
 settings = get_settings()
 
@@ -36,8 +36,12 @@ class CompanyService:
                       search: str | None = None
                       ) -> tuple[Sequence[Company], int]:
 
-        db_companies, count = await self.company_repo.get_companies(offset, limit, sort_column, sort_order, search)
+        db_companies, count = await self.company_repo.get_companies(offset, limit, sort_column, sort_order, search, ["location", "departments", "rooms"])
         return db_companies, count
+
+    async def get(self,company_uuid: UUID):
+        db_company = await self.company_repo.get_by_uuid(company_uuid, ["location", "departments", "rooms"])
+        return db_company
 
     async def create_company(self, company: CompanyAdd):
         db_company = await self.company_repo.get_by_gov_id(company.gov_id)
@@ -75,6 +79,30 @@ class CompanyService:
         new_db_company = await self.company_repo.create(**company_data)
 
         return new_db_company
+
+    async def update_company(self, company_uuid: UUID, company: CompanyEdit):
+        # Get company with location relationship loaded
+        db_company = await self.company_repo.get_by_uuid(company_uuid, ["location"])
+        if not db_company:
+            raise HTTPException(
+                status_code=HTTP_404_NOT_FOUND,
+                detail=f"Company with UUID {company_uuid} not found"
+            )
+
+        update_data = company.model_dump(exclude_unset=True)
+
+        if "location" in update_data and update_data["location"] is not None:
+            location_data = update_data.pop("location")  # Extract location data
+            if db_company.location:  # If company already has a location
+                for key, value in location_data.items():
+                    setattr(db_company.location, key, value)
+
+        # Update the company with remaining data
+        await self.company_repo.update(db_company.id, **update_data)
+
+        # Return updated company
+        # return await self.company_repo.get_by_uuid(company_uuid, ["location"])
+        return None
 
     async def create_department(self, department: DepartmentAdd):
         db_company = await self.company_repo.get_by_uuid(department.company_uuid, ["departments"])
