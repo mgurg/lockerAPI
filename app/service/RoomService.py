@@ -58,7 +58,6 @@ class RoomService:
         if city is None:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"City `{city_ascii_name}` not found!")
 
-        print(city.lat, city.lon)
         db_rooms = await self.room_repo.get_nearby_rooms(city.lat, city.lon, 50,
                                                          ["location", "languages", "translations"])
         return db_rooms

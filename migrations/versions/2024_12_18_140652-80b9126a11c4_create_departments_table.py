@@ -23,8 +23,8 @@ def upgrade() -> None:
         'departments',
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
         sa.Column('uuid', sa.UUID(), nullable=False),
-        sa.Column('company_id', sa.Integer(), nullable=True),
-        sa.Column('location_id', sa.Integer(), nullable=True),
+        sa.Column('company_id', sa.Integer(), nullable=False),
+        sa.Column('location_id', sa.Integer(), nullable=False),
         sa.Column('name', sa.TEXT(), nullable=False),
 
 

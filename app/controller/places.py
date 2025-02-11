@@ -10,6 +10,7 @@ from starlette.status import HTTP_204_NO_CONTENT
 from app.schemas.requests import PlaceAdd
 from app.schemas.responses import CityDetailsResponse
 from app.service.PlaceService import PlaceService
+from app.shared.text_utils import sanitize_location_input
 
 place_router = APIRouter()
 
@@ -25,19 +26,19 @@ async def get_places_with_rooms(place_service: placeServiceDependency, country: 
 
 
 @place_router.get("/{city_ascii_name}")
-async def details(
+async def get_city_details(
     place_service: placeServiceDependency, city_ascii_name: str, language: LanguageAlpha2, country: CountryAlpha2
 ) -> CityDetailsResponse:
-    db_city = await place_service.get_city_details(city_ascii_name, language, country)
+    db_city = await place_service.get_city_details(sanitize_location_input(city_ascii_name), language, country)
 
     return db_city
 
 
-@place_router.get("nearby_city/{city_ascii_name}")
+@place_router.get("/nearby_city/{city_ascii_name}")
 async def get_nearby_cities(
-    place_service: placeServiceDependency, city_ascii_name: str, language: LanguageAlpha2, country: CountryAlpha2
-) -> CityDetailsResponse:
-    db_city = await place_service.get_city_details(city_ascii_name, language, country)
+    place_service: placeServiceDependency, city_ascii_name: str
+):
+    db_city = await place_service.get_nearby_cities(sanitize_location_input(city_ascii_name))
 
     return db_city
 

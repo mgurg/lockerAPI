@@ -15,7 +15,7 @@ RUN adduser \
 WORKDIR /src
 
 # Install uv.
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.5.31 /uv /bin/uv
 ENV UV_PYTHON_PREFERENCE=only-system
 
 COPY --chown=appuser:appuser pyproject.toml .

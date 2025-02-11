@@ -11,6 +11,7 @@ from app.config import get_settings
 from app.database.models.models import Company
 from app.database.repository.CompanyRepo import CompanyRepo
 from app.database.repository.DepartmentRepo import DepartmentRepo
+from app.database.repository.EntityLocationRepo import EntityLocationRepo
 from app.database.repository.LocationRepo import LocationRepo
 from app.schemas.requests import CompanyAdd, CompanyEdit, DepartmentAdd, DepartmentEdit
 
@@ -23,10 +24,12 @@ class CompanyService:
             company_repo: Annotated[CompanyRepo, Depends()],
             department_repo: Annotated[DepartmentRepo, Depends()],
             location_repo: Annotated[LocationRepo, Depends()],
+            entity_location_repo: Annotated[EntityLocationRepo, Depends()],
     ) -> None:
         self.company_repo = company_repo
         self.department_repo = department_repo
         self.location_repo = location_repo
+        self.entity_location_repo = entity_location_repo
 
     async def get_all(self,
                       offset: int,
@@ -57,17 +60,17 @@ class CompanyService:
             "postal_code": company.location.postal_code,
             "country": company.location.country,
             "located_in": company.location.located_in,
-            "type": "room",
+            "type": "company",
             "lat": company.location.lat,
             "lon": company.location.lon,
         }
         db_location = await self.location_repo.create(**location_data)
 
+        # Step 3: Create Company (without location_id)
         company_data = {
             "uuid": str(uuid4()),
             "name": company.name,
-            "brand": company.name,
-            "location_id": db_location.id,
+            "brand": company.brand or company.name,
             "place_id": company.place_id,
             "gov_id": company.gov_id,
             "gov_id_type": company.gov_id_type,
@@ -78,6 +81,16 @@ class CompanyService:
         }
 
         new_db_company = await self.company_repo.create(**company_data)
+
+        # Step 4: Link Company with Location in `entity_locations`
+        entity_location_data = {
+            "entity_type": "company",
+            "entity_id": new_db_company.id,
+            "location_id": db_location.id,
+            "is_primary": True,
+        }
+
+        await self.entity_location_repo.create(**entity_location_data)
 
         return new_db_company
 

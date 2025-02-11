@@ -19,8 +19,15 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    pass
+    op.create_table(
+        'room_tag_link',
+        sa.Column('room_id', sa.INTEGER(), autoincrement=True, nullable=False),
+        sa.Column('tag_id', sa.INTEGER(), autoincrement=False, nullable=False),
+        sa.ForeignKeyConstraint(['room_id'], ['rooms.id']),
+        sa.ForeignKeyConstraint(['tag_id'], ['tags.id']),
+        sa.PrimaryKeyConstraint("room_id", "tag_id")
+    )
 
 
 def downgrade() -> None:
-    pass
+    op.drop_table('room_tag_link')

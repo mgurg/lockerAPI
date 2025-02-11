@@ -35,6 +35,26 @@ class PlaceService:
         self.location_repo = location_repo
         self.room_translation_repo = room_translation_repo
 
+    async def get_nearby_cities(self, city_ascii_name: str):
+        db_city = await self.city_repo.get_place_by_name(city_ascii_name, LanguageAlpha2("pl"))
+        if db_city is None:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"City `{city_ascii_name} not found!")
+
+        db_nearby_cities = await self.city_repo.get_closest_cities(db_city.lat, db_city.lon, LanguageAlpha2("pl"))
+        # Convert the data to a serializable format
+        cities_serialized = [
+            {
+                "name": city[0],
+                "lat": float(city[1]),  # Convert Decimal to float
+                "lon": float(city[2]),  # Convert Decimal to float
+                "importance": float(city[3])  # Convert importance to float if necessary
+            }
+            for city in db_nearby_cities
+        ]
+
+        # Now cities_serialized is a list of dictionaries that can be easily serialized to JSON
+        return cities_serialized
+
     async def get_city_details(self, city_ascii_name: str, language: LanguageAlpha2, country: CountryAlpha2):
         city_and_name = await self.city_repo.get_details_by_ascii_name(city_ascii_name, language, country)
         if city_and_name is None:

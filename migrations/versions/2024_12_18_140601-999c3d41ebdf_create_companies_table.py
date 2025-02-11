@@ -23,7 +23,7 @@ def upgrade() -> None:
     op.create_table(
         'companies',
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
-        sa.Column('uuid', sa.UUID(), nullable=False),
+        sa.Column('uuid', sa.UUID(), nullable=False, unique=True),
         sa.Column('brand', sa.TEXT(), nullable=True),
         sa.Column('name', sa.TEXT(), nullable=False),
         sa.Column('gov_id', sa.TEXT(), nullable=True),
@@ -33,7 +33,7 @@ def upgrade() -> None:
         sa.Column('email', sa.TEXT(), nullable=True),
         sa.Column('notes', sa.TEXT(), nullable=True),
         sa.Column('location_id', sa.Integer(), nullable=False),
-        sa.Column('place_id', sa.TEXT(), nullable=True),
+        # sa.Column('place_id', sa.TEXT(), nullable=True),
         sa.Column('verified_at', postgresql.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
