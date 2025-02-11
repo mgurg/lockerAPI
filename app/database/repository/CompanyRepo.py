@@ -41,7 +41,13 @@ class CompanyRepo(GenericRepo[Company]):
         return result.scalar_one_or_none()
 
     async def get_companies(
-            self, offset: int, limit: int, sort_column: str, sort_order: str, search: str | None = None, load_relations: list[str] | str = None
+            self,
+            offset: int,
+            limit: int,
+            sort_column: str,
+            sort_order: str,
+            search: str | None = None,
+            load_relations: list[str] | str = None
     ) -> tuple[Sequence[Company], int]:
         query = (
             select(self.Model)

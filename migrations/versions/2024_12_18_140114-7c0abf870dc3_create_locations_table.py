@@ -29,8 +29,8 @@ def upgrade() -> None:
         sa.Column('country', sa.TEXT(), nullable=False),
         sa.Column('located_in', sa.TEXT(), nullable=True),  # mall center
         sa.Column('type', sa.TEXT(), nullable=False),  # Room / Department/ Company
-        sa.Column('lat', sa.Numeric(10, 7), nullable=True),
-        sa.Column('lon', sa.Numeric(10, 7), nullable=True)
+        sa.Column('lat', sa.Numeric(10, 7), nullable=True, index=True),
+        sa.Column('lon', sa.Numeric(10, 7), nullable=True, index=True)
     )
 
 

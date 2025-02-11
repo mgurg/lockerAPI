@@ -16,6 +16,20 @@ room_router = APIRouter()
 roomServiceDependency = Annotated[RoomService, Depends()]
 
 
+@room_router.get("/count")
+async def get_rooms_count(room_service: roomServiceDependency) -> int:
+    db_rooms_count = await room_service.get_room_count()
+
+    return db_rooms_count
+
+
+@room_router.get("/nearby/{city_ascii_name}")
+async def get_rooms_nearby(room_service: roomServiceDependency, city_ascii_name: str):
+    db_rooms_count = await room_service.get_rooms_nearby(city_ascii_name)
+
+    return db_rooms_count
+
+
 @room_router.get("/{room_uuid}")
 async def get_room_by_uuid(room_service: roomServiceDependency, room_uuid: UUID):
     db_item = await room_service.get_room_by_uuid(room_uuid)

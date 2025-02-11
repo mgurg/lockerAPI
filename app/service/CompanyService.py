@@ -5,14 +5,14 @@ from uuid import UUID, uuid4
 from fastapi import Depends, HTTPException
 from loguru import logger
 from sqlalchemy import Sequence
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_400_BAD_REQUEST
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from app.config import get_settings
-from app.database.models.models import Company, Department, Location
+from app.database.models.models import Company
 from app.database.repository.CompanyRepo import CompanyRepo
 from app.database.repository.DepartmentRepo import DepartmentRepo
 from app.database.repository.LocationRepo import LocationRepo
-from app.schemas.requests import CompanyAdd, DepartmentAdd, DepartmentEdit, CompanyEdit
+from app.schemas.requests import CompanyAdd, CompanyEdit, DepartmentAdd, DepartmentEdit
 
 settings = get_settings()
 
@@ -36,10 +36,11 @@ class CompanyService:
                       search: str | None = None
                       ) -> tuple[Sequence[Company], int]:
 
-        db_companies, count = await self.company_repo.get_companies(offset, limit, sort_column, sort_order, search, ["location", "departments", "rooms"])
+        db_companies, count = await self.company_repo.get_companies(offset, limit, sort_column, sort_order, search,
+                                                                    ["location", "departments", "rooms"])
         return db_companies, count
 
-    async def get(self,company_uuid: UUID):
+    async def get(self, company_uuid: UUID):
         db_company = await self.company_repo.get_by_uuid(company_uuid, ["location", "departments", "rooms"])
         return db_company
 

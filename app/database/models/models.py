@@ -47,6 +47,32 @@ class Location(BaseModel):
     departments: Mapped[list["Department"]] = relationship(back_populates="location")
 
 
+# class ContactType(Enum):
+#     PHONE = "phone"
+#     EMAIL = "email"
+#     TELEGRAM = "telegram"
+#     WHATSAPP = "whatsapp"
+#     VIBER = "viber"
+#     FACEBOOK = "facebook"
+#
+#
+# class Contact(BaseModel):
+#     __tablename__ = "contacts"
+#
+#     uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True))
+#     type: Mapped[ContactType] = mapped_column(String())
+#     value: Mapped[str] = mapped_column(String())
+#     is_primary: Mapped[bool] = mapped_column(Boolean(), default=False)
+#     description: Mapped[Optional[str]] = mapped_column(String())
+#
+#     # Contactable entity references
+#     department_id: Mapped[Optional[int]] = mapped_column(ForeignKey("departments.id"))
+#     room_id: Mapped[Optional[int]] = mapped_column(ForeignKey("rooms.id"))
+#
+#     # Relationships
+#     department: Mapped[Optional["Department"]] = relationship("Department", back_populates="contacts")
+#     room: Mapped[Optional["Room"]] = relationship("Room", back_populates="contacts")
+
 class City(BaseModel):
     __tablename__ = "cities"
     lat: Mapped[float | None] = mapped_column(Numeric(10, 7))
@@ -111,6 +137,7 @@ class Room(BaseModel):
     department: Mapped[Optional["Department"]] = relationship("Department", back_populates="rooms")
     translations: Mapped[list["RoomTranslation"]] = relationship(back_populates="room")
     languages: Mapped[list["Language"]] = relationship(secondary="room_language_link", back_populates="rooms")
+    # contacts: Mapped[list["Contact"]] = relationship("Contact", back_populates="room")
     # tags: Mapped[List["Tag"]] = relationship(secondary="room_tag", back_populates="rooms")
 
 
@@ -174,6 +201,7 @@ class Department(BaseModel):
     company: Mapped["Company"] = relationship(back_populates="departments")
     location: Mapped["Location"] = relationship(back_populates="departments")
     rooms: Mapped[list["Room"]] = relationship("Room", back_populates="department")
+    # contacts: Mapped[list["Contact"]] = relationship("Contact", back_populates="department")
 
 
 class AiGame(BaseModel):

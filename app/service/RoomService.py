@@ -42,12 +42,26 @@ class RoomService:
         self.language_repo = language_repo
 
     async def get_room_by_uuid(self, room_uuid: UUID) -> Room | None:
-        db_room = await self.room_repo.get_by_uuid(room_uuid, ["location", "languages", "translations", "company", "department"])
+        db_room = await self.room_repo.get_by_uuid(room_uuid,
+                                                   ["location", "languages", "translations", "company", "department"])
 
         if not db_room:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Room `{room_uuid}` not found!")
 
         return db_room
+
+    async def get_room_count(self) -> int:
+        return await self.room_repo.get_count()
+
+    async def get_rooms_nearby(self, city_ascii_name: str):
+        city = await self.city_repo.get_place_by_name(city_ascii_name)
+        if city is None:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"City `{city_ascii_name}` not found!")
+
+        print(city.lat, city.lon)
+        db_rooms = await self.room_repo.get_nearby_rooms(city.lat, city.lon, 50,
+                                                         ["location", "languages", "translations"])
+        return db_rooms
 
     async def get_room_by_url_slug(self, room_url_slug: str,
                                    load_relations: list[str | BinaryExpression] = None) -> Room | None:

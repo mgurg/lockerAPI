@@ -1,7 +1,9 @@
+from math import cos, radians
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
+from pydantic_extra_types.coordinate import Latitude, Longitude
 from sqlalchemy import BinaryExpression, Sequence, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -11,6 +13,9 @@ from app.database.models.models import Location, Room, RoomTranslation
 from app.database.repository.generics import GenericRepo
 
 UserDB = Annotated[AsyncSession, Depends(get_db)]
+
+EARTH_RADIUS_KM = 6371  # Earth's radius in kilometers
+KM_PER_DEGREE_LAT = 111.32  # Approximate km per degree of latitude
 
 
 class RoomRepo(GenericRepo[Room]):
@@ -38,6 +43,12 @@ class RoomRepo(GenericRepo[Room]):
 
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
+
+    async def get_count(self) -> int:
+        query = select(func.count()).select_from(self.Model).where(self.Model.verified_at.isnot(None))
+
+        result = await self.session.execute(query)
+        return result.scalar_one()
 
     async def get_by_url_slug(self, slug: str, load_relations: list[str] | str = None) -> Room | None:
         query = select(self.Model).where(self.Model.url_slug == slug)
@@ -87,11 +98,23 @@ class RoomRepo(GenericRepo[Room]):
 
         return result.scalars().all(), total_records
 
-    async def get_nearby_rooms(self, lat: float, lon: float, load_relations: list[str | BinaryExpression] = None) -> Sequence[Room]:
-        # Haversine formula to calculate distance
+    async def get_nearby_rooms(self, lat: Latitude, lon: Longitude, radius_km: int = 10,
+                               load_relations: list[str | BinaryExpression] = None):
+        # Approximate latitude and longitude bounds
+        lat = float(lat)  # Convert lat to float
+        lon = float(lon)  # Convert lon to float
+        lat_diff = radius_km / KM_PER_DEGREE_LAT
+        lon_diff = radius_km / (KM_PER_DEGREE_LAT * cos(radians(lat)))
+
+        min_lat, max_lat = lat - lat_diff, lat + lat_diff  # Now both are floats
+        min_lon, max_lon = lon - lon_diff, lon + lon_diff
+
+        # Bounding Box SQL filter
         query = (
             select(self.Model)
             .join(Location, self.Model.location_id == Location.id)
+            .where(Location.lat.between(min_lat, max_lat))
+            .where(Location.lon.between(min_lon, max_lon))
             .where(
                 func.acos(
                     func.sin(func.radians(lat)) * func.sin(func.radians(Location.lat))
@@ -99,8 +122,8 @@ class RoomRepo(GenericRepo[Room]):
                     * func.cos(func.radians(Location.lat))
                     * func.cos(func.radians(Location.lon) - func.radians(lon))
                 )
-                * 6371
-                <= 400  # Distance in kilometers (10 km radius)
+                * EARTH_RADIUS_KM
+                <= radius_km  # Final precise distance filter
             )
             .limit(20)
         )

@@ -22,8 +22,8 @@ def upgrade() -> None:
     op.create_table(
         'cities',
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
-        sa.Column('lat', sa.Numeric(precision=10, scale=7), nullable=True),
-        sa.Column('lon', sa.Numeric(precision=10, scale=7), nullable=True),
+        sa.Column('lat', sa.Numeric(precision=10, scale=7), nullable=True, index=True),
+        sa.Column('lon', sa.Numeric(precision=10, scale=7), nullable=True, index=True),
         sa.Column('lat_min', sa.Numeric(precision=10, scale=7), nullable=True),  # South Latitude
         sa.Column('lat_max', sa.Numeric(precision=10, scale=7), nullable=True),  # North Latitude
         sa.Column('lon_min', sa.Numeric(precision=10, scale=7), nullable=True),  # West Longitude

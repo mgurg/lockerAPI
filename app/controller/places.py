@@ -33,6 +33,15 @@ async def details(
     return db_city
 
 
+@place_router.get("nearby_city/{city_ascii_name}")
+async def get_nearby_cities(
+    place_service: placeServiceDependency, city_ascii_name: str, language: LanguageAlpha2, country: CountryAlpha2
+) -> CityDetailsResponse:
+    db_city = await place_service.get_city_details(city_ascii_name, language, country)
+
+    return db_city
+
+
 @place_router.get("/rooms/{location_name}")
 async def get_rooms_by_location(place_service: placeServiceDependency, location_name: str, language: LanguageAlpha2 | None = None):
     db_item = await place_service.get_rooms_by_location(location_name, language)

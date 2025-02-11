@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException
 from pydantic import IPvAnyAddress
+from pydantic_extra_types.coordinate import Latitude, Longitude
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
@@ -90,10 +91,10 @@ class PlaceService:
         #     geo_data =  response.json()
         print(ip)
 
-        latitude = float("50.24230")
-        longitude = float("19.13851")
+        latitude = Latitude("50.24230")
+        longitude = Longitude("19.13851")
 
-        rooms = await self.room_repo.get_nearby_rooms(latitude, longitude, ["translations"])
+        rooms = await self.room_repo.get_nearby_rooms(latitude, longitude, 50, ["translations"])
 
         lang_code = "pl"
         for room in rooms:

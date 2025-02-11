@@ -1,4 +1,4 @@
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from sqlalchemy import and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +8,7 @@ from app.database.models.models import BaseModel
 T = TypeVar("T", bound=BaseModel)
 
 
-class GenericRepo(Generic[T]):
+class GenericRepo[T]:
     def __init__(self, session: AsyncSession, model: type[T]):
         """
         Initializes the repository with the given session and model.
