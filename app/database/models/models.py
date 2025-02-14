@@ -1,11 +1,13 @@
 from typing import Optional
 
 import sqlalchemy as sa
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Numeric, String, Table, func, and_
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Numeric, String, Table, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship, foreign
+from sqlalchemy.orm import Mapped, configure_mappers, mapped_column, relationship
 
 from app.database.db import Base
+
+configure_mappers()
 
 
 class BaseModel(Base):
@@ -32,17 +34,21 @@ room_language_link = Table(
 
 class Location(BaseModel):
     __tablename__ = "locations"
-    street_address: Mapped[str]
+    uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True))
+    street_name: Mapped[str | None]
+    street_number: Mapped[str | None]
     city: Mapped[str]
     state_province: Mapped[str | None]
     postal_code: Mapped[str | None]
     country: Mapped[str]
     located_in: Mapped[str | None]
-    type: Mapped[str | None]
+    type: Mapped[str]
     lat: Mapped[float | None] = mapped_column(Numeric(10, 7))
     lon: Mapped[float | None] = mapped_column(Numeric(10, 7))
 
     rooms: Mapped[list["Room"]] = relationship(back_populates="location")
+    # entity_locations: Mapped[list["EntityLocation"]] = relationship(back_populates="location")
+
     companies: Mapped[list["Company"]] = relationship(back_populates="location")
     departments: Mapped[list["Department"]] = relationship(back_populates="location")
 
@@ -117,9 +123,9 @@ class Room(BaseModel):
     players_min: Mapped[int | None]
     players_max: Mapped[int | None]
     price_from: Mapped[float | None]
-    game_duration: Mapped[int | None]
-    game_difficulty: Mapped[str | None]
-    game_fear_index: Mapped[str | None]
+    duration: Mapped[int | None]
+    difficulty: Mapped[str | None]
+    fear_index: Mapped[str | None]
     reservation_url: Mapped[str | None]
     url_yt: Mapped[str | None]
     lm_id: Mapped[str | None]
@@ -177,7 +183,7 @@ class Company(BaseModel):
     gov_id: Mapped[str | None] = mapped_column(String())
     gov_id_type: Mapped[str | None] = mapped_column(String())
     location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"))
-    place_id: Mapped[str | None] = mapped_column(String())
+    # place_id: Mapped[str | None] = mapped_column(String())
     website: Mapped[str | None] = mapped_column(String())
     phone: Mapped[str | None] = mapped_column(String())
     email: Mapped[str | None] = mapped_column(String())
@@ -186,6 +192,23 @@ class Company(BaseModel):
     created_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now())
 
     location: Mapped[Optional["Location"]] = relationship(back_populates="companies")
+    # Add locations relationship through entity_locations
+    # Define locations relationship using secondary table
+    # locations: Mapped[list["Location"]] = relationship(
+    #     "Location",
+    #     secondary="entity_locations",
+    #     primaryjoin="and_(Company.id == EntityLocation.entity_id, "
+    #                 "EntityLocation.entity_type == 'company')",
+    #     secondaryjoin="EntityLocation.location_id == Location.id",
+    #     viewonly=True
+    # )
+
+    # location_associations = relationship(
+    #     "EntityLocation",
+    #     primaryjoin="and_(Company.id == EntityLocation.entity_id, "
+    #                "EntityLocation.entity_type == 'company')",
+    #     backref="company"
+    # )
     departments: Mapped[list["Department"]] = relationship(back_populates="company")
     rooms: Mapped[list["Room"]] = relationship("Room", back_populates="company")
 
@@ -200,6 +223,13 @@ class Department(BaseModel):
 
     company: Mapped["Company"] = relationship(back_populates="departments")
     location: Mapped["Location"] = relationship(back_populates="departments")
+    # locations: Mapped[list["Location"]] = relationship(
+    #     secondary="entity_locations",
+    #     primaryjoin="and_(Department.id == EntityLocation.entity_id, "
+    #                 "EntityLocation.entity_type == 'department')",
+    #     secondaryjoin="EntityLocation.location_id == Location.id",
+    #     viewonly=True
+    # )
     rooms: Mapped[list["Room"]] = relationship("Room", back_populates="department")
     # contacts: Mapped[list["Contact"]] = relationship("Contact", back_populates="department")
 

@@ -1,9 +1,9 @@
-from typing import Any, TypeVar
 from contextlib import asynccontextmanager
+from typing import Any, TypeVar
 
 from sqlalchemy import and_, select, update
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert  # For PostgreSQL bulk insert optimization
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.models import BaseModel
 

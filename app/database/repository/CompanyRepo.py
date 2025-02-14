@@ -88,3 +88,15 @@ class CompanyRepo(GenericRepo[Company]):
 
         result = await self.session.execute(query)
         return result.scalars().first()
+
+    async def get_company_location(self, company_id: int):
+        return None
+
+    async def get_company_related_locations(
+        self,
+        company_uuid: UUID,
+        entity_type: str | None = None,
+        city: str | None = None,
+        country: str | None = None
+    ):
+        ...

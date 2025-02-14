@@ -6,10 +6,11 @@ Create Date: 2024-12-18 14:06:52.872413
 
 """
 from typing import Sequence, Union
+from uuid import uuid4
 
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = '80b9126a11c4'
@@ -22,7 +23,7 @@ def upgrade() -> None:
     op.create_table(
         'departments',
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
-        sa.Column('uuid', sa.UUID(), nullable=False),
+        sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False, default=uuid4),
         sa.Column('company_id', sa.Integer(), nullable=False),
         sa.Column('location_id', sa.Integer(), nullable=False),
         sa.Column('name', sa.TEXT(), nullable=False),

@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID, uuid4
@@ -11,7 +12,6 @@ from app.config import get_settings
 from app.database.models.models import Company
 from app.database.repository.CompanyRepo import CompanyRepo
 from app.database.repository.DepartmentRepo import DepartmentRepo
-from app.database.repository.EntityLocationRepo import EntityLocationRepo
 from app.database.repository.LocationRepo import LocationRepo
 from app.schemas.requests import CompanyAdd, CompanyEdit, DepartmentAdd, DepartmentEdit
 
@@ -24,12 +24,10 @@ class CompanyService:
             company_repo: Annotated[CompanyRepo, Depends()],
             department_repo: Annotated[DepartmentRepo, Depends()],
             location_repo: Annotated[LocationRepo, Depends()],
-            entity_location_repo: Annotated[EntityLocationRepo, Depends()],
     ) -> None:
         self.company_repo = company_repo
         self.department_repo = department_repo
         self.location_repo = location_repo
-        self.entity_location_repo = entity_location_repo
 
     async def get_all(self,
                       offset: int,
@@ -43,7 +41,7 @@ class CompanyService:
                                                                     ["location", "departments", "rooms"])
         return db_companies, count
 
-    async def get(self, company_uuid: UUID):
+    async def get_one(self, company_uuid: UUID):
         db_company = await self.company_repo.get_by_uuid(company_uuid, ["location", "departments", "rooms"])
         return db_company
 
@@ -54,24 +52,26 @@ class CompanyService:
                                 detail=f"Company with {company.gov_id_type} `{company.gov_id}` already exists")
 
         location_data = {
-            "street_address": company.location.street_address,
+            "uuid": str(uuid4()),
+            "street_name": company.location.street_name,
+            "street_number": company.location.street_number,
             "city": company.location.city,
             "state_province": company.location.state_province,
             "postal_code": company.location.postal_code,
             "country": company.location.country,
+            "type": "city",
             "located_in": company.location.located_in,
-            "type": "company",
             "lat": company.location.lat,
             "lon": company.location.lon,
         }
         db_location = await self.location_repo.create(**location_data)
 
-        # Step 3: Create Company (without location_id)
         company_data = {
             "uuid": str(uuid4()),
             "name": company.name,
             "brand": company.brand or company.name,
-            "place_id": company.place_id,
+            "location_id": db_location.id,
+            # "place_id": company.place_id,
             "gov_id": company.gov_id,
             "gov_id_type": company.gov_id_type,
             "website": company.website,
@@ -82,20 +82,9 @@ class CompanyService:
 
         new_db_company = await self.company_repo.create(**company_data)
 
-        # Step 4: Link Company with Location in `entity_locations`
-        entity_location_data = {
-            "entity_type": "company",
-            "entity_id": new_db_company.id,
-            "location_id": db_location.id,
-            "is_primary": True,
-        }
-
-        await self.entity_location_repo.create(**entity_location_data)
-
         return new_db_company
 
     async def update_company(self, company_uuid: UUID, company: CompanyEdit):
-        # Get company with location relationship loaded
         db_company = await self.company_repo.get_by_uuid(company_uuid, ["location"])
         if not db_company:
             raise HTTPException(
@@ -118,6 +107,7 @@ class CompanyService:
         # return await self.company_repo.get_by_uuid(company_uuid, ["location"])
         return None
 
+
     async def create_department(self, department: DepartmentAdd):
         db_company = await self.company_repo.get_by_uuid(department.company_uuid, ["departments"])
         if not db_company:
@@ -137,6 +127,8 @@ class CompanyService:
 
         if department.location:
             location_data = department.location.model_dump(exclude_unset=True)
+            location_data["uuid"] = str(uuid4())
+            location_data["type"] = "department"
             new_location = await self.location_repo.create(**location_data)
             department_data["location"] = new_location
 
@@ -150,11 +142,13 @@ class CompanyService:
         if not db_department:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND,
                                 detail=f"Company `{department_uuid}` not found!")
-        if db_department.location:
-            await self.location_repo.delete(db_department.location.id)
+
 
         # Delete the department
         await self.department_repo.delete(db_department.id)
+
+        if db_department.location:
+            await self.location_repo.delete(db_department.location.id)
 
         logger.info(f"Department `{department_uuid}` and its related location have been deleted.")
 
@@ -195,6 +189,51 @@ class CompanyService:
 
         departments_uuids = [department.uuid for department in db_company.departments]
 
-        db_departments = await self.department_repo.get_by_uuids(departments_uuids, ["location"])
+        db_departments = await self.department_repo.get_by_uuids(departments_uuids, ["locations"])
 
         return db_departments
+
+    async def get_company_locations(self, company_uuid: UUID):
+        db_locations = await self.company_repo.get_company_related_locations(company_uuid)
+
+        # Create a dictionary to group entities by location ID
+        location_groups = defaultdict(list)
+        locations_data = {}  # Store full location data
+
+        for location, entity_type, entity_id in db_locations:
+            # Store full location data
+            locations_data[location.uuid] = location
+
+            # Append entity info to the group
+            location_groups[location.uuid].append({
+                "type": entity_type,
+                "id": entity_id
+            })
+
+        # Create final response
+        return [
+            {
+                "uuid": loc_id,
+                "street_address": location.street_address,
+                "city": location.city,
+                "state_province": location.state_province,
+                "postal_code": location.postal_code,
+                "country": location.country,
+                "located_in": location.located_in,
+                "lat": float(location.lat) if location.lat else None,
+                "lon": float(location.lon) if location.lon else None,
+                "entities": location_groups[loc_id]  # Get entities for this location
+            }
+            for loc_id, location in locations_data.items()
+        ]
+        # return location_groups
+        # return [
+        #     {
+        #         "street_address": location.street_address,
+        #         "city": location.city,
+        #         "country": location.country,
+        #         "entity_type": entity_type,
+        #         "entity_id": entity_id
+        #     }
+        #     for location, entity_type, entity_id in db_locations
+        # ]

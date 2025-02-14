@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Annotated, Literal
+from typing import Annotated
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -9,18 +9,19 @@ from pydantic_extra_types.language_code import LanguageAlpha2
 
 
 class LocationAdd(BaseModel):
-    street_address: str
+    street_name: str | None = None
+    street_number: str | None = None
     city: str
     state_province: str | None = None
     postal_code: str | None = None
     country: CountryAlpha2
     located_in: str | None = None
-    type: Literal["company", "department", "room"] | None = None
     lat: Latitude | None = None
     lon: Longitude | None = None
 
 
 class LocationEdit(BaseModel):
+    uuid: UUID | None = None
     street_address: str | None = None
     city: str | None = None
     state_province: str | None = None
@@ -77,9 +78,8 @@ class PlaceAdd(BaseModel):
 class CompanyAdd(BaseModel):
     name: str
     brand: str | None = None
-    gov_id: str | None = None
-    gov_id_type: str | None = None
-    place_id: str | None = None
+    gov_id: str
+    gov_id_type: str | None = "NIP"
     website: str | None = None
     email: str | None = None
     phone: str | None = None
@@ -101,7 +101,7 @@ class CompanyEdit(BaseModel):
 class DepartmentAdd(BaseModel):
     company_uuid: UUID
     name: str
-    location: LocationAdd
+    location: LocationAdd | None = None
 
 
 class DepartmentEdit(BaseModel):

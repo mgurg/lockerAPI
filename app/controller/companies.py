@@ -2,7 +2,7 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
-from starlette.status import HTTP_204_NO_CONTENT
+from starlette.status import HTTP_204_NO_CONTENT, HTTP_200_OK, HTTP_201_CREATED
 
 from app.schemas.requests import CompanyAdd, CompanyEdit, DepartmentAdd, DepartmentEdit
 from app.schemas.responses import BaseUuid, CompaniesPaginated
@@ -13,7 +13,7 @@ company_router = APIRouter()
 companyServiceDependency = Annotated[CompanyService, Depends()]
 
 
-@company_router.get("")
+@company_router.get("", status_code=HTTP_200_OK)
 async def get_companies(
         company_service: companyServiceDependency,
         search: Annotated[str | None, Query(max_length=50)] = None,
@@ -26,13 +26,13 @@ async def get_companies(
     return CompaniesPaginated(data=db_companies, count=count, offset=offset, limit=limit)
 
 
-@company_router.get("/{company_uuid}")
+@company_router.get("/{company_uuid}", status_code=HTTP_200_OK)
 async def get_company_by_uuid(company_service: companyServiceDependency, company_uuid: UUID):
-    db_company = await company_service.get(company_uuid)
+    db_company = await company_service.get_one(company_uuid)
     return db_company
 
 
-@company_router.post("")
+@company_router.post("", status_code=HTTP_201_CREATED)
 async def add_company(company_service: companyServiceDependency, company: CompanyAdd) -> BaseUuid:
     db_company = await company_service.create_company(company)
     return BaseUuid(uuid=db_company.uuid)
@@ -50,6 +50,12 @@ async def get_company_departments(company_service: companyServiceDependency, com
     return db_department
 
 
+@company_router.get("/{company_uuid}/locations")
+async def get_company_locations(company_service: companyServiceDependency, company_uuid: UUID):
+    db_locations = await company_service.get_company_locations(company_uuid)
+    return db_locations
+
+
 @company_router.get("/departments/{department_uuid}")
 async def get_department(company_service: companyServiceDependency, department_uuid: UUID):
     db_department = await company_service.get_department(department_uuid)
@@ -63,7 +69,8 @@ async def create_department(company_service: companyServiceDependency, departmen
 
 
 @company_router.patch("/departments/{department_uuid}", status_code=HTTP_204_NO_CONTENT)
-async def update_department(company_service: companyServiceDependency, department_uuid: UUID, department: DepartmentEdit) -> None:
+async def update_department(company_service: companyServiceDependency, department_uuid: UUID,
+                            department: DepartmentEdit) -> None:
     await company_service.update_department(department_uuid, department)
     return None
 

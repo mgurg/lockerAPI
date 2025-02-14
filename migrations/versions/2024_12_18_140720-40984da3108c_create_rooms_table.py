@@ -6,6 +6,7 @@ Create Date: 2024-12-18 14:07:20.960936
 
 """
 from typing import Sequence, Union
+from uuid import uuid4
 
 from alembic import op
 import sqlalchemy as sa
@@ -22,7 +23,7 @@ def upgrade() -> None:
     op.create_table(
         'rooms',
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
-        sa.Column('uuid', sa.UUID(), nullable=False),
+        sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False, default=uuid4),
         sa.Column('url_slug', sa.TEXT(), nullable=False),
         sa.Column('name', sa.TEXT(), nullable=False),
         sa.Column('active', sa.Boolean(), nullable=False),
