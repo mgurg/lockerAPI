@@ -6,7 +6,7 @@ from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
 from starlette.status import HTTP_204_NO_CONTENT
 
-from app.schemas.requests import RoomAdd
+from app.schemas.requests import RoomAdd, RoomEdit
 from app.schemas.responses import RoomIndexResponse, RoomsPaginated
 from app.service.RoomService import RoomService
 
@@ -68,14 +68,20 @@ async def rooms_by_location(
 
 
 @room_router.post("")
-async def add_room(room_service: roomServiceDependency, room: RoomAdd):
-    db_item = await room_service.create_room(room)
+async def create_room(room_service: roomServiceDependency, room: RoomAdd):
+    db_room = await room_service.create_room(room)
 
-    return db_item
+    return db_room
+
+
+@room_router.patch("/{room_uuid}", status_code=HTTP_204_NO_CONTENT)
+async def update_room(room_service: roomServiceDependency, room_uuid: UUID, room: RoomEdit) -> None:
+    await room_service.update_room(room_uuid, room)
+    return None
 
 
 @room_router.delete("/{room_uuid}", status_code=HTTP_204_NO_CONTENT)
-async def delete_room(room_service: roomServiceDependency, room_uuid: UUID):
+async def delete_room(room_service: roomServiceDependency, room_uuid: UUID) -> None:
     await room_service.delete_room(room_uuid)
 
     return None

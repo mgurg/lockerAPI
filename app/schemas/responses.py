@@ -15,7 +15,8 @@ class StandardResponse(BaseResponse):
 
 
 class Location(BaseResponse):
-    street_address: str
+    street_name: str | None
+    street_number: str | None
     city: str
     state_province: str | None = None
     postal_code: str | None = None
@@ -62,7 +63,7 @@ class RoomIndexResponse(BaseResponse):
     players_min: int | None
     players_max: int | None
     price_from: float | None
-    game_duration: int | None
+    duration: int | None
     location: Location
     translation: RoomTranslation | None = None
 

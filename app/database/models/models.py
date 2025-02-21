@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import uuid4
 
 import sqlalchemy as sa
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Numeric, String, Table, func
@@ -32,6 +33,14 @@ room_language_link = Table(
 )
 
 
+department_contacts = Table(
+    "department_contacts",
+    BaseModel.metadata,
+    Column("department_id", ForeignKey("departments.id", ondelete="CASCADE"), primary_key=True),
+    Column("contact_id", ForeignKey("contacts.id", ondelete="CASCADE"), primary_key=True),
+)
+
+
 class Location(BaseModel):
     __tablename__ = "locations"
     uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True))
@@ -62,22 +71,29 @@ class Location(BaseModel):
 #     FACEBOOK = "facebook"
 #
 #
-# class Contact(BaseModel):
-#     __tablename__ = "contacts"
-#
-#     uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True))
-#     type: Mapped[ContactType] = mapped_column(String())
-#     value: Mapped[str] = mapped_column(String())
-#     is_primary: Mapped[bool] = mapped_column(Boolean(), default=False)
-#     description: Mapped[Optional[str]] = mapped_column(String())
-#
-#     # Contactable entity references
-#     department_id: Mapped[Optional[int]] = mapped_column(ForeignKey("departments.id"))
-#     room_id: Mapped[Optional[int]] = mapped_column(ForeignKey("rooms.id"))
-#
-#     # Relationships
-#     department: Mapped[Optional["Department"]] = relationship("Department", back_populates="contacts")
-#     room: Mapped[Optional["Room"]] = relationship("Room", back_populates="contacts")
+class Contact(BaseModel):
+    __tablename__ = "contacts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True), default=uuid4)
+    type: Mapped[str] = mapped_column(String())  # phone, email, im, etc.
+    value: Mapped[str] = mapped_column(String())
+    country_code: Mapped[str | None] = mapped_column(String(), nullable=True)
+    description: Mapped[str | None] = mapped_column(String(), nullable=True)
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
+    is_primary_for_company: Mapped[bool] = mapped_column(Boolean(), default=False)
+    created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True),
+                                                 server_default=func.now(),
+                                                 onupdate=func.now())
+
+    company: Mapped["Company"] = relationship("Company", back_populates="contacts")
+
+    departments: Mapped[list["Department"]] = relationship(
+        secondary="contacts_departments",
+        back_populates="contacts"
+    )
+
 
 class City(BaseModel):
     __tablename__ = "cities"
@@ -183,7 +199,6 @@ class Company(BaseModel):
     gov_id: Mapped[str | None] = mapped_column(String())
     gov_id_type: Mapped[str | None] = mapped_column(String())
     location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"))
-    # place_id: Mapped[str | None] = mapped_column(String())
     website: Mapped[str | None] = mapped_column(String())
     phone: Mapped[str | None] = mapped_column(String())
     email: Mapped[str | None] = mapped_column(String())
@@ -192,23 +207,6 @@ class Company(BaseModel):
     created_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now())
 
     location: Mapped[Optional["Location"]] = relationship(back_populates="companies")
-    # Add locations relationship through entity_locations
-    # Define locations relationship using secondary table
-    # locations: Mapped[list["Location"]] = relationship(
-    #     "Location",
-    #     secondary="entity_locations",
-    #     primaryjoin="and_(Company.id == EntityLocation.entity_id, "
-    #                 "EntityLocation.entity_type == 'company')",
-    #     secondaryjoin="EntityLocation.location_id == Location.id",
-    #     viewonly=True
-    # )
-
-    # location_associations = relationship(
-    #     "EntityLocation",
-    #     primaryjoin="and_(Company.id == EntityLocation.entity_id, "
-    #                "EntityLocation.entity_type == 'company')",
-    #     backref="company"
-    # )
     departments: Mapped[list["Department"]] = relationship(back_populates="company")
     rooms: Mapped[list["Room"]] = relationship("Room", back_populates="company")
 
@@ -223,13 +221,7 @@ class Department(BaseModel):
 
     company: Mapped["Company"] = relationship(back_populates="departments")
     location: Mapped["Location"] = relationship(back_populates="departments")
-    # locations: Mapped[list["Location"]] = relationship(
-    #     secondary="entity_locations",
-    #     primaryjoin="and_(Department.id == EntityLocation.entity_id, "
-    #                 "EntityLocation.entity_type == 'department')",
-    #     secondaryjoin="EntityLocation.location_id == Location.id",
-    #     viewonly=True
-    # )
+
     rooms: Mapped[list["Room"]] = relationship("Room", back_populates="department")
     # contacts: Mapped[list["Contact"]] = relationship("Contact", back_populates="department")
 

@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID, uuid4
 
@@ -18,7 +19,7 @@ from app.database.repository.LanguageRepo import LanguageRepo
 from app.database.repository.LocationRepo import LocationRepo
 from app.database.repository.RoomRepo import RoomRepo
 from app.database.repository.RoomTranslationRepo import RoomTranslationRepo
-from app.schemas.requests import RoomAdd
+from app.schemas.requests import RoomAdd, RoomEdit
 from app.shared.text_utils import sanitize_location_input
 
 
@@ -118,40 +119,31 @@ class RoomService:
 
     async def create_room(self, room: RoomAdd) -> Room | None:
         db_company = await self.company_repo.get_by_uuid(room.company_uuid, ["location"])
+        location = None
         if not db_company:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"Company `{room.company_uuid}` not found!")
-        location = db_company.location
+        else:
+            location = db_company.location
 
         db_department = await self.department_repo.get_by_uuid(room.department_uuid, ["location"])
         if not db_department:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST,
                                 detail=f"Department `{room.department_uuid}` not found!")
-        location = db_department.location
+        else:
+            location = db_department.location
+
         db_languages = await self.language_repo.get_by_codes(room.supported_languages)
 
-        location_data = {
-            "street_address": room.location.street_address if room.location else location.street_address,
-            "city": room.location.city if room.location else location.city,
-            "state_province": room.location.state_province if room.location else location.state_province,
-            "postal_code": room.location.postal_code if room.location else location.postal_code,
-            "country": room.location.country if room.location else location.country,
-            "lat": room.location.lat if room.location else location.lat,
-            "lon": room.location.lon if room.location else location.lon,
-            "type": "room"
-        }
-
-        db_location = await self.location_repo.create(**location_data)
-
         translation = ""
-        if db_location.lat and db_location.lon:
-            db_cities = await self.city_repo.get_places_by_bbox(db_location.lat, db_location.lon,
+        if location.lat and location.lon:
+            db_cities = await self.city_repo.get_places_by_bbox(location.lat, location.lon,
                                                                 ["geo_names"])
             for city in db_cities:
                 translation = next((t for t in city.geo_names if t.lang == "pl"), None)
                 logger.info(f"Matching `{room.name}` with {city.id} as {translation.name}")
         else:
             logger.warning(
-                f"No lat/long data for `{room.name}`: {location_data["street_address"]}, {location_data["city"]}")
+                f"No lat/long data for `{room.name}`: {location.street_name}, {location.city}")
         try:
             unique_slug = await self.generate_unique_slug(room.name, "XXXX")
 
@@ -163,9 +155,9 @@ class RoomService:
             "url_slug": unique_slug,
             "name": room.name,
             "active": True,
-            "location": db_location,
+            "location": location,
             "price_from": room.price_from,
-            "game_duration": room.game_duration,
+            "duration": room.game_duration,
             "players_min": room.players_min,
             "players_max": room.players_max,
             "reservation_url": room.reservation_url,
@@ -190,6 +182,55 @@ class RoomService:
             await self.room_translation_repo.create(**room_translation_data)
 
         return new_db_room
+
+    async def update_room(self, room_uuid: UUID, room: RoomEdit) -> None:
+        db_room = await self.room_repo.get_by_uuid(room_uuid, ["location", "company", "department", "languages"])
+        if not db_room:
+            raise HTTPException(
+                status_code=HTTP_404_NOT_FOUND,
+                detail=f"Room with UUID {room_uuid} not found"
+            )
+
+        update_data = room.model_dump(exclude_unset=True)
+
+        # Handle department and location updates
+        if "department_uuid" in update_data:
+            db_department = await self.department_repo.get_by_uuid(update_data["department_uuid"], ["location"])
+            if not db_department:
+                raise HTTPException(
+                    status_code=HTTP_400_BAD_REQUEST,
+                    detail=f"Department `{update_data['department_uuid']}` not found!"
+                )
+            update_data["department_id"] = db_department.id
+            update_data["location_id"] = db_department.location.id if db_department.location else db_room.location_id
+            del update_data["department_uuid"]  # Remove UUID, as we store only the ID
+
+        # Handle supported languages update
+        if "supported_languages" in update_data:
+            # db_languages = await self.language_repo.get_by_codes(update_data["supported_languages"])
+            # update_data["languages"] = db_languages
+            del update_data["supported_languages"]  # Remove from update_data since it's not a direct column
+
+        update_data["updated_at"] = datetime.now(UTC)  # Ensure timestamp update
+
+        # Handle translations update
+        del update_data["translation"]
+
+        await self.room_repo.update(db_room.id, **update_data)
+
+        # if "translation" in update_data:
+        #     await self.room_translation_repo.delete_by_room_id(db_room.id)
+        #     for translation in update_data["translation"]:
+        #         await self.room_translation_repo.create(
+        #             room_id=db_room.id,
+        #             lang=translation.lang,
+        #             title=translation.title,
+        #             lead=translation.lead,
+        #             description=translation.description
+        #
+        #         )
+
+        return None
 
     async def delete_room(self, room_uuid: UUID) -> None:
         db_room = await self.room_repo.get_by_uuid(room_uuid)

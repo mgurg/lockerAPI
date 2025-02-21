@@ -50,9 +50,22 @@ class RoomAdd(BaseModel):
     reservation_url: str | None = None
     lm_id: str | None = None
     mt_id: str | None = None
-    location: LocationAdd | None = None
     translation: list[TranslationAdd]
     supported_languages: list[LanguageAlpha2]
+
+
+class RoomEdit(BaseModel):
+    name: str | None
+    department_uuid: UUID | None = None
+    price_from: float | None = None
+    game_duration: int | None = None
+    players_min: int | None = None
+    players_max: int | None = None
+    reservation_url: str | None = None
+    lm_id: str | None = None
+    mt_id: str | None = None
+    translation: list[TranslationAdd] | None = None
+    supported_languages: list[LanguageAlpha2] | None = None
 
 
 class GeoNameAdd(BaseModel):

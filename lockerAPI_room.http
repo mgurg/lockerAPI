@@ -9,8 +9,8 @@ Content-Type: application/json
 
 {
   "name": "Skarb Piratów",
-  "company_uuid": "8fac069f-66db-4cd4-ba1e-a8f69a64dec1",
-  "department_uuid": "3e090234-20bf-422e-95e6-29625fe9c427",
+  "company_uuid": "cebe6767-5932-4cee-9eed-484314482fac",
+  "department_uuid": "e6a8b50b-51b5-4d9f-b0f0-492c6ff0e5db",
   "price_from": 160,
   "game_duration": 60,
   "players_min": 2,

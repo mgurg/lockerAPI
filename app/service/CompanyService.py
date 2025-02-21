@@ -1,4 +1,3 @@
-from collections import defaultdict
 from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID, uuid4
@@ -107,6 +106,29 @@ class CompanyService:
         # return await self.company_repo.get_by_uuid(company_uuid, ["location"])
         return None
 
+    async def delete_company(self, company_uuid: UUID):
+        db_company = await self.company_repo.get_by_uuid(company_uuid, ["location", "departments"])
+        if not db_company:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+                                detail=f"Company `{company_uuid}` not found!")
+
+        # Finally delete the company
+        await self.company_repo.delete(db_company.id)
+
+        # Get all department IDs for deletion
+        department_ids = [dept.id for dept in db_company.departments]
+
+        # Delete all departments associated with this company
+        for dept_id in department_ids:
+            await self.department_repo.delete(dept_id)
+
+        # Check if this location is only used by this company
+        location = db_company.location
+        if location:
+            # Location is only associated with this company, so delete it
+            await self.location_repo.delete(location.id)
+
+        return {"message": f"Company {company_uuid} and all associated data deleted successfully"}
 
     async def create_department(self, department: DepartmentAdd):
         db_company = await self.company_repo.get_by_uuid(department.company_uuid, ["departments"])
@@ -142,7 +164,6 @@ class CompanyService:
         if not db_department:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND,
                                 detail=f"Company `{department_uuid}` not found!")
-
 
         # Delete the department
         await self.department_repo.delete(db_department.id)
@@ -189,51 +210,11 @@ class CompanyService:
 
         departments_uuids = [department.uuid for department in db_company.departments]
 
-        db_departments = await self.department_repo.get_by_uuids(departments_uuids, ["locations"])
+        db_departments = await self.department_repo.get_by_uuids(departments_uuids, ["location"])
 
         return db_departments
 
     async def get_company_locations(self, company_uuid: UUID):
         db_locations = await self.company_repo.get_company_related_locations(company_uuid)
 
-        # Create a dictionary to group entities by location ID
-        location_groups = defaultdict(list)
-        locations_data = {}  # Store full location data
-
-        for location, entity_type, entity_id in db_locations:
-            # Store full location data
-            locations_data[location.uuid] = location
-
-            # Append entity info to the group
-            location_groups[location.uuid].append({
-                "type": entity_type,
-                "id": entity_id
-            })
-
-        # Create final response
-        return [
-            {
-                "uuid": loc_id,
-                "street_address": location.street_address,
-                "city": location.city,
-                "state_province": location.state_province,
-                "postal_code": location.postal_code,
-                "country": location.country,
-                "located_in": location.located_in,
-                "lat": float(location.lat) if location.lat else None,
-                "lon": float(location.lon) if location.lon else None,
-                "entities": location_groups[loc_id]  # Get entities for this location
-            }
-            for loc_id, location in locations_data.items()
-        ]
-        # return location_groups
-        # return [
-        #     {
-        #         "street_address": location.street_address,
-        #         "city": location.city,
-        #         "country": location.country,
-        #         "entity_type": entity_type,
-        #         "entity_id": entity_id
-        #     }
-        #     for location, entity_type, entity_id in db_locations
-        # ]
+        return None

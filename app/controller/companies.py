@@ -2,7 +2,7 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
-from starlette.status import HTTP_204_NO_CONTENT, HTTP_200_OK, HTTP_201_CREATED
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.schemas.requests import CompanyAdd, CompanyEdit, DepartmentAdd, DepartmentEdit
 from app.schemas.responses import BaseUuid, CompaniesPaginated
@@ -33,7 +33,7 @@ async def get_company_by_uuid(company_service: companyServiceDependency, company
 
 
 @company_router.post("", status_code=HTTP_201_CREATED)
-async def add_company(company_service: companyServiceDependency, company: CompanyAdd) -> BaseUuid:
+async def create_company(company_service: companyServiceDependency, company: CompanyAdd) -> BaseUuid:
     db_company = await company_service.create_company(company)
     return BaseUuid(uuid=db_company.uuid)
 
@@ -41,6 +41,12 @@ async def add_company(company_service: companyServiceDependency, company: Compan
 @company_router.patch("/{company_uuid}", status_code=HTTP_204_NO_CONTENT)
 async def update_company(company_service: companyServiceDependency, company_uuid: UUID, company: CompanyEdit) -> None:
     await company_service.update_company(company_uuid, company)
+    return None
+
+
+@company_router.delete("/{company_uuid}", status_code=HTTP_204_NO_CONTENT)
+async def delete_company(company_service: companyServiceDependency, company_uuid: UUID) -> None:
+    await company_service.delete_company(company_uuid)
     return None
 
 
