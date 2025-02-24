@@ -120,3 +120,13 @@ class DepartmentAdd(BaseModel):
 class DepartmentEdit(BaseModel):
     name: str | None = None
     location: LocationEdit | None = None
+
+
+class ContactAdd(BaseModel):
+    company_uuid: UUID
+    department_uuid: UUID | None = None
+    type: str  # phone/viber/whatsapp
+    value: str
+    country_code: str | None = None
+    is_primary: bool = False
+    description: str | None = None

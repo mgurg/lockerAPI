@@ -1,0 +1,112 @@
+@place_name=warszawa
+@ip=91.216.213.142
+
+
+### Create new room
+POST http://0.0.0.0:5000/rooms
+accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Skarb Piratów",
+  "company_uuid": "cebe6767-5932-4cee-9eed-484314482fac",
+  "department_uuid": "e6a8b50b-51b5-4d9f-b0f0-492c6ff0e5db",
+  "price_from": 160,
+  "game_duration": 60,
+  "players_min": 2,
+  "players_max": 4,
+  "reservation_url": "https://lockandroll.pl/booking/1/",
+  "lm_id": "room-706",
+  "mt_id": null,
+  "supported_languages": ["en","pl"],
+  "translation": [
+    {
+      "lang": "pl",
+      "title": "Skarb Piratów",
+      "lead": "Odzyskaj medalion Rudobrodego z pirackiej tawerny pełnej zagadek!",
+      "description": "Rudobrody, słynny wilk morski, stracił swój najcenniejszy skarb – tajemniczy medalion, który miał wręczyć ukochanej. Wszystko przez słabość do hazardu i rumu, która zawiodła go do pirackiej tawerny pełnej kart, głośnych śmiechów i zgubnych zakładów. Teraz, zrozpaczony i bezradny, zwraca się do Was – jedynych, którzy mogą uratować jego honor i odzyskać to, co przepadło. Piracka tawerna w sercu Krakowa to miejsce pełne tajemnic, podstępnych pułapek i zagadek, które przetestują Wasz spryt i odwagę. Każdy krok naprzód odkrywa kolejne sekrety, a stawka rośnie z każdą chwilą. Czy zdołacie odzyskać skarb i pokonać wyzwania tego niezwykłego escape roomu? Rudobrody pokłada w Was nadzieję – nie zawiedźcie go!"
+    },
+    {
+      "lang": "en",
+      "title": "Pirates' Treasure",
+      "lead": "Recover Rudobrody's medallion from a pirate tavern full of puzzles!",
+      "description": "Rudobrody, a famous sea wolf, lost his most precious treasure – a mysterious medallion he intended to give to his beloved. All because of his weakness for gambling and rum, which led him to a pirate tavern filled with cards, loud laughter, and risky bets. Now, desperate and helpless, he turns to you – the only ones who can restore his honor and reclaim what was lost. The pirate tavern in the heart of Krakow is a place full of mysteries, cunning traps, and puzzles that will test your wit and courage. Every step forward reveals more secrets, and the stakes grow higher with every passing moment. Can you retrieve the treasure and overcome the challenges of this extraordinary escape room? Rudobrody is counting on you – don’t let him down!"
+    }
+  ]
+}
+
+### Create new room
+GET http://0.0.0.0:5000/rooms/7e79294a-2440-4fa6-b260-0c7fa3ce89eb
+accept: application/json
+Content-Type: application/json
+
+### Create new room
+POST http://0.0.0.0:5000/rooms
+accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Szepty lasu",
+  "company_uuid": "a64096f2-138c-45af-9966-04358914f831",
+  "department_uuid": "8c844511-3d34-45e4-a6dd-2d0bd7bc63fc",
+  "price_from": 170,
+  "game_duration": 60,
+  "players_min": 2,
+  "players_max": 4,
+  "reservation_url": "https://lockandroll.pl/booking/7/",
+  "lm_id": "room-13629",
+  "mt_id": null,
+  "supported_languages": ["pl"],
+  "translation": [
+    {
+      "lang": "pl",
+      "title": "Szepty Lasu",
+      "lead": "Wyrusz w poszukiwaniu legendarnego kwiatu paproci podczas Nocy Świętojańskiej!",
+      "description": "Wejdź do świata pradawnych słowiańskich wierzeń i podejmij się wyjątkowego wyzwania – odnalezienia legendarnego kwiatu paproci. Tylko raz w roku, podczas magicznej Nocy Świętojańskiej, możecie stanąć przed szansą odkrycia tego niezwykłego skarbu. Czeka na Was tajemniczy las pełen zagadek, niebezpieczeństw i pradawnej magii. Bądźcie czujni, bo magia tego miejsca nie zna granic!"
+    },
+    {
+      "lang": "en",
+      "title": "Whispers of the Forest",
+      "lead": "Embark on a quest to find the legendary fern flower during Midsummer Night!",
+      "description": "Enter the world of ancient Slavic beliefs and take on the extraordinary challenge of finding the legendary fern flower. Once a year, during the magical Midsummer Night, you have the chance to uncover this mystical treasure. The enchanted forest awaits, full of puzzles, dangers, and ancient magic. Stay alert, as the magic of this place knows no limits!"
+    }
+  ]
+}
+
+### Create new room - full template
+POST http://0.0.0.0:5000/rooms
+accept: application/json
+Content-Type: application/json
+
+{
+  "name": "string",
+  "company_uuid": "a64096f2-138c-45af-9966-04358914f831",
+  "department_uuid": "8c844511-3d34-45e4-a6dd-2d0bd7bc63fc",
+  "price_from": 0,
+  "game_duration": 0,
+  "players_min": 0,
+  "players_max": 0,
+  "reservation_url": "string",
+  "lm_id": "string",
+  "mt_id": "string",
+  "supported_languages": ["en","pl"],
+  "location": {
+    "street_address": "string",
+    "city": "string",
+    "state_province": "string",
+    "postal_code": "string",
+    "country": "PL",
+    "located_in": "string",
+    "type": "company",
+    "lat": 0,
+    "lon": 0
+  },
+  "translation": {
+    "lang": "pl",
+    "title": "string",
+    "lead": "string",
+    "description": "string"
+  }
+}
+
+

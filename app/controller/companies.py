@@ -4,13 +4,15 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
-from app.schemas.requests import CompanyAdd, CompanyEdit, DepartmentAdd, DepartmentEdit
+from app.schemas.requests import CompanyAdd, CompanyEdit, DepartmentAdd, DepartmentEdit, ContactAdd
 from app.schemas.responses import BaseUuid, CompaniesPaginated
 from app.service.CompanyService import CompanyService
+from app.service.ContactService import ContactService
 
 company_router = APIRouter()
 
 companyServiceDependency = Annotated[CompanyService, Depends()]
+contactServiceDependency = Annotated[ContactService, Depends()]
 
 
 @company_router.get("", status_code=HTTP_200_OK)
@@ -85,3 +87,14 @@ async def update_department(company_service: companyServiceDependency, departmen
 async def delete_department(company_service: companyServiceDependency, department_uuid: UUID) -> None:
     await company_service.delete_department(department_uuid)
     return None
+
+
+@company_router.get("/{company_uuid}/contacts")
+async def get_company_contacts(contact_service: contactServiceDependency, company_uuid: UUID):
+    db_locations = await contact_service.get_company_contacts(company_uuid)
+    return db_locations
+
+@company_router.post("/contacts")
+async def create_contact(contact_service: contactServiceDependency, contact: ContactAdd) -> BaseUuid:
+    db_department = await contact_service.create_contact(contact)
+    return BaseUuid(uuid=db_department.uuid)

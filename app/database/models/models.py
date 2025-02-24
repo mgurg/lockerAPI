@@ -33,8 +33,8 @@ room_language_link = Table(
 )
 
 
-department_contacts = Table(
-    "department_contacts",
+contacts_departments = Table(
+    "contacts_departments",
     BaseModel.metadata,
     Column("department_id", ForeignKey("departments.id", ondelete="CASCADE"), primary_key=True),
     Column("contact_id", ForeignKey("contacts.id", ondelete="CASCADE"), primary_key=True),
@@ -69,30 +69,26 @@ class Location(BaseModel):
 #     WHATSAPP = "whatsapp"
 #     VIBER = "viber"
 #     FACEBOOK = "facebook"
-#
-#
+
 class Contact(BaseModel):
     __tablename__ = "contacts"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True), default=uuid4)
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
     type: Mapped[str] = mapped_column(String())  # phone, email, im, etc.
     value: Mapped[str] = mapped_column(String())
     country_code: Mapped[str | None] = mapped_column(String(), nullable=True)
     description: Mapped[str | None] = mapped_column(String(), nullable=True)
-    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
-    is_primary_for_company: Mapped[bool] = mapped_column(Boolean(), default=False)
+    is_primary: Mapped[bool] = mapped_column(Boolean(), default=False)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True),
                                                  server_default=func.now(),
                                                  onupdate=func.now())
 
     company: Mapped["Company"] = relationship("Company", back_populates="contacts")
+    departments: Mapped[list["Department"]] = relationship(secondary="contacts_departments", back_populates="contacts")
 
-    departments: Mapped[list["Department"]] = relationship(
-        secondary="contacts_departments",
-        back_populates="contacts"
-    )
 
 
 class City(BaseModel):
@@ -209,6 +205,8 @@ class Company(BaseModel):
     location: Mapped[Optional["Location"]] = relationship(back_populates="companies")
     departments: Mapped[list["Department"]] = relationship(back_populates="company")
     rooms: Mapped[list["Room"]] = relationship("Room", back_populates="company")
+    contacts: Mapped[list["Contact"]] = relationship(back_populates="company")
+
 
 
 class Department(BaseModel):
@@ -224,6 +222,10 @@ class Department(BaseModel):
 
     rooms: Mapped[list["Room"]] = relationship("Room", back_populates="department")
     # contacts: Mapped[list["Contact"]] = relationship("Contact", back_populates="department")
+
+    contacts: Mapped[list[Contact]] = relationship(
+        secondary=contacts_departments, back_populates="departments"
+    )
 
 
 class AiGame(BaseModel):

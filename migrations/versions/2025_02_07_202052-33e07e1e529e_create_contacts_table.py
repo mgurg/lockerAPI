@@ -31,7 +31,6 @@ def upgrade() -> None:
         sa.Column('value', sa.TEXT(), nullable=False),
         sa.Column('country_code', sa.TEXT(), nullable=False),
         sa.Column('is_primary', sa.Boolean(), nullable=False),
-        sa.Column('is_primary_for_company', sa.Boolean(), nullable=False),
         sa.Column('description', sa.TEXT(), nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), nullable=True),
@@ -43,12 +42,11 @@ def upgrade() -> None:
         'contacts_departments',
         sa.Column('department_id', sa.INTEGER(), sa.ForeignKey('departments.id', ), nullable=False),
         sa.Column('contact_id', sa.INTEGER(), sa.ForeignKey('contacts.id', ), nullable=False),
-        sa.PrimaryKey('department_id', 'contact_id'),
+        sa.PrimaryKeyConstraint('department_id', 'contact_id'),
     )
 
 
 def downgrade() -> None:
     # Drop table
-    op.drop_table('contacts')
-    op.drop_table('contacts_company')
     op.drop_table('contacts_departments')
+    op.drop_table('contacts')
