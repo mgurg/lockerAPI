@@ -44,7 +44,7 @@ class RoomService:
 
     async def get_room_by_uuid(self, room_uuid: UUID) -> Room | None:
         db_room = await self.room_repo.get_by_uuid(room_uuid,
-                                                   ["location", "languages", "translations", "company", "department"])
+                                                   ["location", "tags", "languages", "translations", "company", "department"])
 
         if not db_room:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Room `{room_uuid}` not found!")

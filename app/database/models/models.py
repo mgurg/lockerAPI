@@ -33,11 +33,18 @@ room_language_link = Table(
 )
 
 
-contacts_departments = Table(
-    "contacts_departments",
+contacts_departments_link = Table(
+    "contacts_departments_link",
     BaseModel.metadata,
     Column("department_id", ForeignKey("departments.id", ondelete="CASCADE"), primary_key=True),
     Column("contact_id", ForeignKey("contacts.id", ondelete="CASCADE"), primary_key=True),
+)
+
+room_tag_link = Table(
+    "room_tag_link",
+    BaseModel.metadata,
+    Column("room_id", ForeignKey("rooms.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
 )
 
 
@@ -87,8 +94,7 @@ class Contact(BaseModel):
                                                  onupdate=func.now())
 
     company: Mapped["Company"] = relationship("Company", back_populates="contacts")
-    departments: Mapped[list["Department"]] = relationship(secondary="contacts_departments", back_populates="contacts")
-
+    departments: Mapped[list["Department"]] = relationship(secondary="contacts_departments_link", back_populates="contacts")
 
 
 class City(BaseModel):
@@ -154,9 +160,26 @@ class Room(BaseModel):
     company: Mapped[Optional["Company"]] = relationship("Company", back_populates="rooms")
     department: Mapped[Optional["Department"]] = relationship("Department", back_populates="rooms")
     translations: Mapped[list["RoomTranslation"]] = relationship(back_populates="room")
-    languages: Mapped[list["Language"]] = relationship(secondary="room_language_link", back_populates="rooms")
+
+    # Many-to-Many Relationship
+    tags: Mapped[list["Tag"]] = relationship("Tag", secondary=room_tag_link, back_populates="rooms")
+    languages: Mapped[list["Language"]] = relationship("Language", secondary=room_language_link, back_populates="rooms")
+
     # contacts: Mapped[list["Contact"]] = relationship("Contact", back_populates="room")
-    # tags: Mapped[List["Tag"]] = relationship(secondary="room_tag", back_populates="rooms")
+
+
+class Tag(BaseModel):
+    __tablename__ = "tags"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+
+    # Many-to-Many Relationship
+    rooms: Mapped[list["Room"]] = relationship(
+        "Room",
+        secondary=room_tag_link,
+        back_populates="tags"
+    )
 
 
 class Language(Base):
@@ -208,7 +231,6 @@ class Company(BaseModel):
     contacts: Mapped[list["Contact"]] = relationship(back_populates="company")
 
 
-
 class Department(BaseModel):
     __tablename__ = "departments"
 
@@ -224,7 +246,7 @@ class Department(BaseModel):
     # contacts: Mapped[list["Contact"]] = relationship("Contact", back_populates="department")
 
     contacts: Mapped[list[Contact]] = relationship(
-        secondary=contacts_departments, back_populates="departments"
+        secondary=contacts_departments_link, back_populates="departments"
     )
 
 

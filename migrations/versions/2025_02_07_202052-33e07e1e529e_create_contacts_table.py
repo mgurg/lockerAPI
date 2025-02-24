@@ -39,7 +39,7 @@ def upgrade() -> None:
 
     # Create department_contacts association table
     op.create_table(
-        'contacts_departments',
+        'contacts_departments_link',
         sa.Column('department_id', sa.INTEGER(), sa.ForeignKey('departments.id', ), nullable=False),
         sa.Column('contact_id', sa.INTEGER(), sa.ForeignKey('contacts.id', ), nullable=False),
         sa.PrimaryKeyConstraint('department_id', 'contact_id'),
@@ -48,5 +48,5 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     # Drop table
-    op.drop_table('contacts_departments')
+    op.drop_table('contacts_departments_link')
     op.drop_table('contacts')

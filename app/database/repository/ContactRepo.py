@@ -3,14 +3,12 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
-from pydantic_extra_types.country import CountryAlpha2
-from pydantic_extra_types.language_code import LanguageAlpha2
-from sqlalchemy import select, BinaryExpression
+from sqlalchemy import BinaryExpression, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.database.db import get_db
-from app.database.models.models import Contact, Company
+from app.database.models.models import Company, Contact
 from app.database.repository.generics import GenericRepo
 
 UserDB = Annotated[AsyncSession, Depends(get_db)]
@@ -40,7 +38,6 @@ class ContactRepo(GenericRepo[Contact]):
 
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
-
 
     async def get_by_company_id(self, company_id: int, load_relations: list[str] | str = None) -> Sequence[Company]:
         query = select(self.Model).where(self.Model.company_id == company_id)

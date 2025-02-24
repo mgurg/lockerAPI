@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
-from app.schemas.requests import CompanyAdd, CompanyEdit, DepartmentAdd, DepartmentEdit, ContactAdd
+from app.schemas.requests import CompanyAdd, CompanyEdit, ContactAdd, DepartmentAdd, DepartmentEdit
 from app.schemas.responses import BaseUuid, CompaniesPaginated
 from app.service.CompanyService import CompanyService
 from app.service.ContactService import ContactService
@@ -58,10 +58,10 @@ async def get_company_departments(company_service: companyServiceDependency, com
     return db_department
 
 
-@company_router.get("/{company_uuid}/locations")
-async def get_company_locations(company_service: companyServiceDependency, company_uuid: UUID):
-    db_locations = await company_service.get_company_locations(company_uuid)
-    return db_locations
+# @company_router.get("/{company_uuid}/locations")
+# async def get_company_locations(company_service: companyServiceDependency, company_uuid: UUID):
+#     db_locations = await company_service.get_company_locations(company_uuid)
+#     return db_locations
 
 
 @company_router.get("/departments/{department_uuid}")
@@ -93,6 +93,7 @@ async def delete_department(company_service: companyServiceDependency, departmen
 async def get_company_contacts(contact_service: contactServiceDependency, company_uuid: UUID):
     db_locations = await contact_service.get_company_contacts(company_uuid)
     return db_locations
+
 
 @company_router.post("/contacts")
 async def create_contact(contact_service: contactServiceDependency, contact: ContactAdd) -> BaseUuid:

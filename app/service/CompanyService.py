@@ -12,7 +12,7 @@ from app.database.models.models import Company
 from app.database.repository.CompanyRepo import CompanyRepo
 from app.database.repository.DepartmentRepo import DepartmentRepo
 from app.database.repository.LocationRepo import LocationRepo
-from app.schemas.requests import CompanyAdd, CompanyEdit, DepartmentAdd, DepartmentEdit, ContactAdd
+from app.schemas.requests import CompanyAdd, CompanyEdit, DepartmentAdd, DepartmentEdit
 
 settings = get_settings()
 
@@ -42,6 +42,9 @@ class CompanyService:
 
     async def get_one(self, company_uuid: UUID):
         db_company = await self.company_repo.get_by_uuid(company_uuid, ["location", "departments", "rooms"])
+        if not db_company:
+            raise HTTPException(status_code=HTTP_409_CONFLICT,
+                                detail=f"Company`{company_uuid}` not found")
         return db_company
 
     async def create_company(self, company: CompanyAdd):
@@ -88,7 +91,7 @@ class CompanyService:
         if not db_company:
             raise HTTPException(
                 status_code=HTTP_404_NOT_FOUND,
-                detail=f"Company with UUID {company_uuid} not found"
+                detail=f"Company with `{company_uuid}` not found"
             )
 
         update_data = company.model_dump(exclude_unset=True)
@@ -213,4 +216,3 @@ class CompanyService:
         db_departments = await self.department_repo.get_by_uuids(departments_uuids, ["location"])
 
         return db_departments
-

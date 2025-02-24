@@ -130,3 +130,8 @@ class ContactAdd(BaseModel):
     country_code: str | None = None
     is_primary: bool = False
     description: str | None = None
+
+
+class TagAdd(BaseModel):
+    room_uuid: UUID
+    name: str
