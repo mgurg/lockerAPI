@@ -91,7 +91,6 @@ class PlaceService:
         if city is None:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Place `{place_name}` as: `{url_safe_place}` not found!")
 
-        print(city.lon_min, city.lon_max, city.lat_min, city.lat_max)
         rooms, counter = await self.room_repo.get_by_bbox(city.lon_min, city.lon_max, city.lat_min, city.lat_max, ["translations"])
 
         if counter == 0:
@@ -134,6 +133,8 @@ class PlaceService:
 
     async def create_place(self, place: PlaceAdd):
         city_data = {
+            "name" : place.name,
+            "name_ascii" : sanitize_location_input(place.name),
             "lat": place.lat,
             "lon": place.lon,
             "lat_min": place.lat_min,
@@ -145,6 +146,7 @@ class PlaceService:
             "category": place.category,
             "region": place.region,
             "country": place.country,
+            "language": place.language,
         }
 
         db_city = await self.city_repo.create(**city_data)

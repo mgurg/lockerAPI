@@ -22,6 +22,8 @@ def upgrade() -> None:
     op.create_table(
         'cities',
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False, primary_key=True),
+        sa.Column('name', sa.TEXT(), nullable=False),
+        sa.Column('name_ascii', sa.TEXT(), nullable=False),
         sa.Column('lat', sa.Numeric(precision=10, scale=7), nullable=True, index=True),
         sa.Column('lon', sa.Numeric(precision=10, scale=7), nullable=True, index=True),
         sa.Column('lat_min', sa.Numeric(precision=10, scale=7), nullable=True),  # South Latitude
@@ -33,6 +35,7 @@ def upgrade() -> None:
         sa.Column('category', sa.TEXT(), nullable=False),
         sa.Column('region', sa.TEXT(), nullable=True),
         sa.Column('country', sa.TEXT(), nullable=True),
+        sa.Column('language', sa.TEXT(), nullable=True),
         sa.Column('seo_title', sa.TEXT(), nullable=True),
         sa.Column('seo_description', sa.TEXT(), nullable=True),
     )

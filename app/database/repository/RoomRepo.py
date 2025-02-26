@@ -90,7 +90,7 @@ class RoomRepo(GenericRepo[Room]):
         )
 
         # Join the rooms with the locations subquery
-        query = select(self.Model).join(location_subquery, self.Model.location_id == location_subquery.c.id)
+        query = select(self.Model).join(location_subquery, self.Model.location_id == location_subquery.c.id).where(self.Model.active.is_(True))
 
         query = self._apply_relationship_loading(query, load_relations)
         result = await self.session.execute(query.offset(offset).limit(limit))

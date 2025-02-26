@@ -2,11 +2,12 @@ from typing import Optional
 from uuid import uuid4
 
 import sqlalchemy as sa
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Numeric, String, Table, func
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Numeric, String, Table, func, Enum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, configure_mappers, mapped_column, relationship
 
 from app.database.db import Base
+from app.database.models.enums import ContactType, GameDifficulty, FearLevel
 
 configure_mappers()
 
@@ -31,7 +32,6 @@ room_language_link = Table(
     Column("room_id", sa.Integer, ForeignKey("rooms.id", ondelete="CASCADE"), primary_key=True),
     Column("language_id", sa.Integer, ForeignKey("languages.id", ondelete="CASCADE"), primary_key=True)
 )
-
 
 contacts_departments_link = Table(
     "contacts_departments_link",
@@ -63,19 +63,10 @@ class Location(BaseModel):
     lon: Mapped[float | None] = mapped_column(Numeric(10, 7))
 
     rooms: Mapped[list["Room"]] = relationship(back_populates="location")
-    # entity_locations: Mapped[list["EntityLocation"]] = relationship(back_populates="location")
 
     companies: Mapped[list["Company"]] = relationship(back_populates="location")
     departments: Mapped[list["Department"]] = relationship(back_populates="location")
 
-
-# class ContactType(Enum):
-#     PHONE = "phone"
-#     EMAIL = "email"
-#     TELEGRAM = "telegram"
-#     WHATSAPP = "whatsapp"
-#     VIBER = "viber"
-#     FACEBOOK = "facebook"
 
 class Contact(BaseModel):
     __tablename__ = "contacts"
@@ -83,22 +74,23 @@ class Contact(BaseModel):
     id: Mapped[int] = mapped_column(primary_key=True)
     uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True), default=uuid4)
     company_id: Mapped[int] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
-    type: Mapped[str] = mapped_column(String())  # phone, email, im, etc.
+    type: Mapped[ContactType] = mapped_column(Enum(ContactType), nullable=False)
     value: Mapped[str] = mapped_column(String())
     country_code: Mapped[str | None] = mapped_column(String(), nullable=True)
     description: Mapped[str | None] = mapped_column(String(), nullable=True)
     is_primary: Mapped[bool] = mapped_column(Boolean(), default=False)
-    created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True),
-                                                 server_default=func.now(),
-                                                 onupdate=func.now())
+    updated_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
+    created_at: Mapped[DateTime | None] = mapped_column(DateTime(), default=func.now())
 
     company: Mapped["Company"] = relationship("Company", back_populates="contacts")
-    departments: Mapped[list["Department"]] = relationship(secondary="contacts_departments_link", back_populates="contacts")
+    departments: Mapped[list["Department"]] = relationship(secondary="contacts_departments_link",
+                                                           back_populates="contacts")
 
 
 class City(BaseModel):
     __tablename__ = "cities"
+    name: Mapped[str]
+    name_ascii: Mapped[str]
     lat: Mapped[float | None] = mapped_column(Numeric(10, 7))
     lon: Mapped[float | None] = mapped_column(Numeric(10, 7))
     lat_min: Mapped[float | None] = mapped_column(Numeric(10, 7))
@@ -110,6 +102,7 @@ class City(BaseModel):
     category: Mapped[str] = mapped_column(String(16))
     region: Mapped[str | None] = mapped_column(String(64))
     country: Mapped[str | None] = mapped_column(String(2))
+    language: Mapped[str | None] = mapped_column(String(2))
     seo_title: Mapped[str | None] = mapped_column(String())
     seo_description: Mapped[str | None] = mapped_column(String())
 
@@ -133,22 +126,27 @@ class Room(BaseModel):
 
     uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True))
     url_slug: Mapped[str]
-    location_id: Mapped[int | None] = mapped_column(ForeignKey("locations.id"))
-    company_id: Mapped[int | None] = mapped_column(ForeignKey("companies.id"))
-    department_id: Mapped[int | None] = mapped_column(ForeignKey("departments.id"))
     name: Mapped[str]
     active: Mapped[bool]
     players_min: Mapped[int | None]
     players_max: Mapped[int | None]
     price_from: Mapped[float | None]
+    currency: Mapped[str | None]
     duration: Mapped[int | None]
-    difficulty: Mapped[str | None]
-    fear_index: Mapped[str | None]
-    reservation_url: Mapped[str | None]
+    difficulty: Mapped[GameDifficulty | None] = mapped_column(Enum(GameDifficulty), nullable=True)
+    fear_level: Mapped[FearLevel | None] = mapped_column(Enum(FearLevel), nullable=True)
+    rating: Mapped[str | None]
+    category: Mapped[str | None]
+    booking_url: Mapped[str | None]
     url_yt: Mapped[str | None]
     lm_id: Mapped[str | None]
     mt_id: Mapped[str | None]
-    order: Mapped[str | None]
+    sort_order: Mapped[str | None]
+    hero_img: Mapped[str | None]
+    icon_img: Mapped[str | None]
+    location_id: Mapped[int | None] = mapped_column(ForeignKey("locations.id"))
+    company_id: Mapped[int | None] = mapped_column(ForeignKey("companies.id"))
+    department_id: Mapped[int | None] = mapped_column(ForeignKey("departments.id"))
     verified_at: Mapped[DateTime | None] = mapped_column(DateTime())
     opened_at: Mapped[DateTime | None] = mapped_column(DateTime())
     suspended_at: Mapped[DateTime | None] = mapped_column(DateTime())

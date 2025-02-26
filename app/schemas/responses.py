@@ -59,13 +59,15 @@ class RoomTranslation(BaseResponse):
 class RoomIndexResponse(BaseResponse):
     uuid: UUID
     url_slug: str
-    reservation_url: str | None
+    booking_url: str | None
     players_min: int | None
     players_max: int | None
     price_from: float | None
     duration: int | None
     location: Location
     translation: RoomTranslation | None = None
+    department: BasicDepartment | None = None
+
 
 
 class RoomsPaginated(BaseResponse):

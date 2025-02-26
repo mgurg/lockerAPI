@@ -1,10 +1,10 @@
-from collections.abc import Sequence
+
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
 from pydantic_extra_types.country import CountryAlpha2
-from sqlalchemy import BinaryExpression, func, select
+from sqlalchemy import BinaryExpression, func, select, Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.db import get_db
@@ -30,6 +30,7 @@ class LocationRepo(GenericRepo[Location]):
             select(Location.city, Location.state_province, func.count(Room.id).label("room_count"))
             .join(Room, Room.location_id == Location.id)
             .where(Location.country == country)
+            .where(Room.active.is_(True))
             .group_by(Location.city, Location.state_province)
             .having(func.count(Room.id) > cut_off)
             .order_by(func.count(Room.id).desc())
