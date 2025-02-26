@@ -61,7 +61,7 @@ class CompanyService:
             "state_province": company.location.state_province,
             "postal_code": company.location.postal_code,
             "country": company.location.country,
-            "type": "city",
+            "type": "company",
             "located_in": company.location.located_in,
             "lat": company.location.lat,
             "lon": company.location.lon,
@@ -134,7 +134,7 @@ class CompanyService:
         return {"message": f"Company {company_uuid} and all associated data deleted successfully"}
 
     async def create_department(self, department: DepartmentAdd):
-        db_company = await self.company_repo.get_by_uuid(department.company_uuid, ["departments"])
+        db_company = await self.company_repo.get_by_uuid(department.company_uuid, ["departments", "location"])
         if not db_company:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND,
                                 detail=f"Company `{department.company_uuid}` not found!")
@@ -145,19 +145,35 @@ class CompanyService:
                                 detail=f"Name `{department.name}` already in use for company `{department.company_uuid}`")
 
         department_data = {
-                "uuid": str(uuid4()),
-                "name": department.name,
-                "company": db_company,
-            }
+            "uuid": str(uuid4()),
+            "name": department.name,
+            "company": db_company,
+        }
 
-        if department.location:
+        if department.location is not None:
             location_data = department.location.model_dump(exclude_unset=True)
             location_data["uuid"] = str(uuid4())
             location_data["type"] = "department"
             new_location = await self.location_repo.create(**location_data)
             department_data["location"] = new_location
+        else:
+            location_data = {
+                "uuid": str(uuid4()),
+                "street_name": db_company.location.street_name,
+                "street_number": db_company.location.street_number,
+                "city": db_company.location.city,
+                "state_province": db_company.location.state_province,
+                "postal_code": db_company.location.postal_code,
+                "country": db_company.location.country,
+                "type": "department",
+                "located_in": db_company.location.located_in,
+                "lat": db_company.location.lat,
+                "lon": db_company.location.lon,
+            }
+            new_location = await self.location_repo.create(**location_data)
+            department_data["location"] = new_location
 
-            # Create the new department
+        # Create the new department
         new_department = await self.department_repo.create(**department_data)
 
         return new_department

@@ -7,6 +7,8 @@ from pydantic_extra_types.coordinate import Latitude, Longitude
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
 
+from app.database.models.enums import ContactType, GameDifficulty, FearLevel
+
 
 class LocationAdd(BaseModel):
     street_name: str | None = None
@@ -44,10 +46,14 @@ class RoomAdd(BaseModel):
     company_uuid: UUID
     department_uuid: UUID | None = None
     price_from: float | None = None
-    game_duration: int | None = None
+    duration: int | None = None
     players_min: int | None = None
     players_max: int | None = None
-    reservation_url: str | None = None
+    booking_url: str | None = None
+    difficulty :  GameDifficulty | None = None
+    category :  str | None = None
+    fear_level :  FearLevel | None = None
+    url_yt:  str | None = None
     lm_id: str | None = None
     mt_id: str | None = None
     translation: list[TranslationAdd]
@@ -61,7 +67,7 @@ class RoomEdit(BaseModel):
     game_duration: int | None = None
     players_min: int | None = None
     players_max: int | None = None
-    reservation_url: str | None = None
+    booking_url: str | None = None
     lm_id: str | None = None
     mt_id: str | None = None
     translation: list[TranslationAdd] | None = None
@@ -74,6 +80,7 @@ class GeoNameAdd(BaseModel):
 
 
 class PlaceAdd(BaseModel):
+    name: str
     lat: Annotated[Decimal | None, Field(max_digits=10, decimal_places=7)]
     lon: Annotated[Decimal | None, Field(max_digits=10, decimal_places=7)]
     lat_min: Annotated[Decimal | None, Field(max_digits=10, decimal_places=7)]  # South Latitude
@@ -85,6 +92,7 @@ class PlaceAdd(BaseModel):
     category: str
     region: str | None
     country: CountryAlpha2 | None
+    language: LanguageAlpha2 | None
     geo_names: list[GeoNameAdd]
 
 
@@ -125,7 +133,7 @@ class DepartmentEdit(BaseModel):
 class ContactAdd(BaseModel):
     company_uuid: UUID
     department_uuid: UUID | None = None
-    type: str  # phone/viber/whatsapp
+    type:  ContactType
     value: str
     country_code: str | None = None
     is_primary: bool = False

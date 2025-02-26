@@ -19,7 +19,8 @@ from app.database.repository.LanguageRepo import LanguageRepo
 from app.database.repository.LocationRepo import LocationRepo
 from app.database.repository.RoomRepo import RoomRepo
 from app.database.repository.RoomTranslationRepo import RoomTranslationRepo
-from app.schemas.requests import RoomAdd, RoomEdit
+from app.schemas.requests import RoomAdd, RoomEdit, LocationEdit
+from app.schemas.responses import Location
 from app.shared.text_utils import sanitize_location_input
 
 
@@ -140,12 +141,13 @@ class RoomService:
                                                                 ["geo_names"])
             for city in db_cities:
                 translation = next((t for t in city.geo_names if t.lang == "pl"), None)
-                logger.info(f"Matching `{room.name}` with {city.id} as {translation.name}")
+                if translation:
+                    logger.info(f"Matching `{room.name}` with {city.id} as {translation.name}")
         else:
             logger.warning(
                 f"No lat/long data for `{room.name}`: {location.street_name}, {location.city}")
         try:
-            unique_slug = await self.generate_unique_slug(room.name, "XXXX")
+            unique_slug = await self.generate_unique_slug(room.name, location)
 
         except ValueError as e:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(e)) from e
@@ -154,13 +156,18 @@ class RoomService:
             "uuid": str(uuid4()),
             "url_slug": unique_slug,
             "name": room.name,
-            "active": True,
+            "active": False,
             "location": location,
             "price_from": room.price_from,
-            "duration": room.game_duration,
+            "currency": "PLN",
+            "difficulty": room.difficulty,
+            "fear_level": room.fear_level,
+            "duration": room.duration,
+            "category": room.category,
             "players_min": room.players_min,
             "players_max": room.players_max,
-            "reservation_url": room.reservation_url,
+            "booking_url": room.booking_url,
+            "url_yt": room.url_yt,
             "lm_id": room.lm_id,
             "mt_id": room.mt_id,
             "company_id": db_company.id,
@@ -247,15 +254,17 @@ class RoomService:
 
         return None
 
-    async def generate_unique_slug(self, name: str, city: str) -> str:
+    async def generate_unique_slug(self, name: str, location: Location) -> str:
         """Generate a unique URL-friendly slug."""
         base_slug = sanitize_location_input(name)
 
         if not await self.room_exists_by_url_slug(base_slug):
             return base_slug
 
-        slug_with_address = f"{base_slug}-{sanitize_location_input(city)}"
-        if not await self.room_exists_by_url_slug(slug_with_address):
-            return slug_with_address
+        if location:
+            slug_with_city = f"{base_slug}-{sanitize_location_input(location.city)}"
+            if not await self.room_exists_by_url_slug(slug_with_city):
+                return slug_with_city
+            return f"{base_slug}-{sanitize_location_input(location.city)-{sanitize_location_input(location.country)}}"
 
-        raise ValueError(f"Unable to generate a unique slug for room '{name}' at '{city}'")
+        raise ValueError(f"Unable to generate a unique slug for room '{name}' at '{location.city}'")
