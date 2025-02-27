@@ -66,6 +66,8 @@ class RoomIndexResponse(BaseResponse):
     duration: int | None
     location: Location
     translation: RoomTranslation | None = None
+    department: BasicDepartment | None = None
+
 
 
 class RoomsPaginated(BaseResponse):

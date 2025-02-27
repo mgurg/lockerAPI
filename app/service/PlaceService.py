@@ -91,7 +91,6 @@ class PlaceService:
         if city is None:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Place `{place_name}` as: `{url_safe_place}` not found!")
 
-        print(city.lon_min, city.lon_max, city.lat_min, city.lat_max)
         rooms, counter = await self.room_repo.get_by_bbox(city.lon_min, city.lon_max, city.lat_min, city.lat_max, ["translations"])
 
         if counter == 0:

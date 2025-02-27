@@ -24,7 +24,8 @@ class LocationAdd(BaseModel):
 
 class LocationEdit(BaseModel):
     uuid: UUID | None = None
-    street_address: str | None = None
+    street_name: str | None = None
+    street_number: str | None = None
     city: str | None = None
     state_province: str | None = None
     postal_code: str | None = None
