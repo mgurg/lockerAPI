@@ -1,4 +1,4 @@
-
+from collections.abc import Sequence
 from typing import Annotated
 from uuid import UUID
 
