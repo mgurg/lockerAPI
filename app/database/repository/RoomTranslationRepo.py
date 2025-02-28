@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import Sequence, select
+from sqlalchemy import Sequence, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.db import get_db
@@ -24,3 +24,8 @@ class RoomTranslationRepo(GenericRepo[RoomTranslation]):
 
         result = await self.session.execute(query)
         return result.scalars().all()
+
+    async def delete_by_room_id(self, room_id: int) -> None:
+        query = delete(self.Model).where(self.Model.room_id == room_id)
+        await self.session.execute(query)
+        await self.session.commit()

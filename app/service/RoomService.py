@@ -221,21 +221,20 @@ class RoomService:
         update_data["updated_at"] = datetime.now(UTC)  # Ensure timestamp update
 
         # Handle translations update
-        del update_data["translation"]
+        if "translation" in update_data:
+            await self.room_translation_repo.delete_by_room_id(db_room.id)
+            for translation in update_data["translation"]:
+                room_translation_data = {
+                    "room_id": db_room.id,
+                    "lang": translation["lang"],
+                    "title": translation["title"],
+                    "lead": translation["lead"],
+                    "description": translation["description"],
+                }
+                await self.room_translation_repo.create(**room_translation_data)
+            del update_data["translation"]
 
         await self.room_repo.update(db_room.id, **update_data)
-
-        # if "translation" in update_data:
-        #     await self.room_translation_repo.delete_by_room_id(db_room.id)
-        #     for translation in update_data["translation"]:
-        #         await self.room_translation_repo.create(
-        #             room_id=db_room.id,
-        #             lang=translation.lang,
-        #             title=translation.title,
-        #             lead=translation.lead,
-        #             description=translation.description
-        #
-        #         )
 
         return None
 
