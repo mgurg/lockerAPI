@@ -25,6 +25,8 @@ def upgrade() -> None:
         sa.Column('type', sa.TEXT(), nullable=False),
         sa.Column('active', sa.Boolean(), nullable=False),
     )
+    # Urodziny, Wieczór panieński
+
 
     op.bulk_insert(
         sa.table(

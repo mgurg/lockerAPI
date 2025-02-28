@@ -196,7 +196,7 @@ class Language(Base):
 
 class RoomTranslation(BaseModel):
     __tablename__ = "room_translations"
-
+    uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True))
     room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
     lang: Mapped[str] = mapped_column(String(2))
     title: Mapped[str] = mapped_column(String(128))

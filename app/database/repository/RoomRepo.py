@@ -65,32 +65,37 @@ class RoomRepo(GenericRepo[Room]):
         return result.scalar_one_or_none()
 
     async def get_by_location_and_language(
-        self, slug: str, lang_code: str, load_relations: list[str | BinaryExpression] = None
-    ) -> Room | None: ...
+            self, slug: str, lang_code: str, load_relations: list[str | BinaryExpression] = None
+    ) -> Room | None:
+        ...
 
     async def get_by_bbox(
-        self,
-        min_lon: float,
-        max_lon: float,
-        min_lat: float,
-        max_lat: float,
-        load_relations: list[str | BinaryExpression],
-        offset: int | None = None,
-        limit: int | None = None,
-        sort_column: str | None = None,
-        sort_order: str | None = None,
+            self,
+            min_lon: float,
+            max_lon: float,
+            min_lat: float,
+            max_lat: float,
+            load_relations: list[str | BinaryExpression],
+            offset: int | None = None,
+            limit: int | None = None,
+            sort_column: str | None = None,
+            sort_order: str | None = None,
     ) -> tuple[Sequence[Room], int]:
         # bbox = left,bottom,right,top
         # bbox = min Longitude , min Latitude , max Longitude , max Latitude
 
         location_subquery = (
             select(Location.id)
-            .where((Location.lon >= min_lon) & (Location.lon <= max_lon), (Location.lat >= min_lat) & (Location.lat <= max_lat))
+            .where((Location.lon >= min_lon) & (Location.lon <= max_lon),
+                   (Location.lat >= min_lat) & (Location.lat <= max_lat))
             .subquery()
         )
 
         # Join the rooms with the locations subquery
-        query = select(self.Model).join(location_subquery, self.Model.location_id == location_subquery.c.id).where(self.Model.active.is_(True))
+        query = (
+            select(self.Model).join(location_subquery, self.Model.location_id == location_subquery.c.id)
+            .where(self.Model.active.is_(True))
+        )
 
         query = self._apply_relationship_loading(query, load_relations)
         result = await self.session.execute(query.offset(offset).limit(limit))
@@ -139,7 +144,17 @@ class RoomRepo(GenericRepo[Room]):
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def get_by_url_slug_and_lang(self, slug: str, lang_code: str, load_relations: list[str | BinaryExpression] = None) -> Room | None:
+    async def get_by_url_slug_and_lang(self, slug: str, lang_code: str,
+                                       load_relations: list[str | BinaryExpression] = None) -> Room | None:
+
+        # stmt = (
+        #     select(Room)
+        #     .join(RoomTranslation, Room.id == RoomTranslation.room_id)
+        #     .filter(Room.url_slug == slug, RoomTranslation.lang == lang_code)
+        #     .options(joinedload(Room.translations))  # Load translations
+        # )
+        # result = await self.session.execute(stmt)
+        # return result.scalar_one_or_none()
         # Solution 1
         query = (
             select(self.Model)

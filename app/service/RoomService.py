@@ -75,14 +75,21 @@ class RoomService:
 
     async def get_room_by_url_slug_and_language(self, room_url_slug, lang_code: CountryAlpha2,
                                                 load_relations: list[str | BinaryExpression] = None):
-        db_room = await self.room_repo.get_by_url_slug_and_lang(room_url_slug, lang_code, load_relations)
+        db_room = await self.room_repo.get_by_url_slug(room_url_slug, load_relations)
         if not db_room:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Room `{room_url_slug}` not found!")
 
-        # Fetch the specific translation for the given language
-        translation = next((t for t in db_room.translations if t.lang == lang_code.lower()), None)
-        db_room.translation = translation if translation else None
+        translation = await self.room_translation_repo.get_translation_by_room_id_and_lang(room_id=db_room.id, lang_code=lang_code)
 
+        db_room.translation = translation
+        # db_room = await self.room_repo.get_by_url_slug_and_lang(room_url_slug, lang_code, load_relations)
+        # if not db_room:
+        #     raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Room `{room_url_slug}` not found!")
+        #
+        # # Fetch the specific translation for the given language
+        # translation = next((t for t in db_room.translations if t.lang == lang_code.lower()), None)
+        # db_room.translation = translation if translation else None
+        #
         return db_room
 
     async def get_rooms_by_location_and_language(self, location: str, language: str,
@@ -179,6 +186,7 @@ class RoomService:
 
         for translation in room.translation:
             room_translation_data = {
+                "uuid": str(uuid4()),
                 "room_id": new_db_room.id,
                 "lang": translation.lang,
                 "title": translation.title,
@@ -225,6 +233,7 @@ class RoomService:
             await self.room_translation_repo.delete_by_room_id(db_room.id)
             for translation in update_data["translation"]:
                 room_translation_data = {
+                    "uuid": str(uuid4()),
                     "room_id": db_room.id,
                     "lang": translation["lang"],
                     "title": translation["title"],

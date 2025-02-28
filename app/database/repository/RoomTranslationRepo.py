@@ -29,3 +29,18 @@ class RoomTranslationRepo(GenericRepo[RoomTranslation]):
         query = delete(self.Model).where(self.Model.room_id == room_id)
         await self.session.execute(query)
         await self.session.commit()
+
+    async def get_translation_by_room_id_and_lang(self, room_id: int, lang_code: str, default_lang: str = "pl") -> RoomTranslation | None:
+        """
+        Fetch the room translation for a given language.
+        If not found, fetch the default language translation.
+        """
+        query = (
+            select(self.Model)
+            .where(self.Model.room_id == room_id)
+            .where(self.Model.lang.in_([lang_code, default_lang]))  # Look for both languages
+            # .order_by(self.Model.lang == lang_code.desc())  # Prefer the requested language first
+            .limit(1)
+        )
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
