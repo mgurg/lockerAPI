@@ -7,7 +7,7 @@ from pydantic_extra_types.coordinate import Latitude, Longitude
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
 
-from app.database.models.enums import ContactType, GameDifficulty, FearLevel
+from app.database.models.enums import ContactType, FearLevel, GameDifficulty
 
 
 class LocationAdd(BaseModel):
@@ -51,9 +51,9 @@ class RoomAdd(BaseModel):
     players_min: int | None = None
     players_max: int | None = None
     booking_url: str | None = None
-    difficulty :  GameDifficulty | None = None
-    category :  str | None = None
-    fear_level :  FearLevel | None = None
+    difficulty:  GameDifficulty | None = None
+    category:  str | None = None
+    fear_level:  FearLevel | None = None
     url_yt:  str | None = None
     lm_id: str | None = None
     mt_id: str | None = None

@@ -19,7 +19,7 @@ from app.database.repository.LanguageRepo import LanguageRepo
 from app.database.repository.LocationRepo import LocationRepo
 from app.database.repository.RoomRepo import RoomRepo
 from app.database.repository.RoomTranslationRepo import RoomTranslationRepo
-from app.schemas.requests import RoomAdd, RoomEdit, LocationEdit
+from app.schemas.requests import RoomAdd, RoomEdit
 from app.schemas.responses import Location
 from app.shared.text_utils import sanitize_location_input
 
@@ -264,6 +264,6 @@ class RoomService:
             slug_with_city = f"{base_slug}-{sanitize_location_input(location.city)}"
             if not await self.room_exists_by_url_slug(slug_with_city):
                 return slug_with_city
-            return f"{base_slug}-{sanitize_location_input(location.city)-{sanitize_location_input(location.country)}}"
+            return f"{base_slug}-{sanitize_location_input(location.city) - {sanitize_location_input(location.country)}}"
 
         raise ValueError(f"Unable to generate a unique slug for room '{name}' at '{location.city}'")

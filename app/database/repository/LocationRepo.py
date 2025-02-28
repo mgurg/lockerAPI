@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import Depends
 from pydantic_extra_types.country import CountryAlpha2
-from sqlalchemy import BinaryExpression, func, select, Sequence
+from sqlalchemy import BinaryExpression, Sequence, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.db import get_db

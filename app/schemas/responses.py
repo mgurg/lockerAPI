@@ -69,7 +69,6 @@ class RoomIndexResponse(BaseResponse):
     department: BasicDepartment | None = None
 
 
-
 class RoomsPaginated(BaseResponse):
     data: list[RoomIndexResponse]
     count: int

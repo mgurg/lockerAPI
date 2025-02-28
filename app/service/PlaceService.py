@@ -133,8 +133,8 @@ class PlaceService:
 
     async def create_place(self, place: PlaceAdd):
         city_data = {
-            "name" : place.name,
-            "name_ascii" : sanitize_location_input(place.name),
+            "name": place.name,
+            "name_ascii": sanitize_location_input(place.name),
             "lat": place.lat,
             "lon": place.lon,
             "lat_min": place.lat_min,

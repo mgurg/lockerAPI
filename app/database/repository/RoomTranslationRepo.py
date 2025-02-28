@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import Sequence, select, delete
+from sqlalchemy import Sequence, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.db import get_db

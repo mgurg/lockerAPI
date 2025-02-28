@@ -2,12 +2,12 @@ from typing import Optional
 from uuid import uuid4
 
 import sqlalchemy as sa
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Numeric, String, Table, func, Enum
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, Numeric, String, Table, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, configure_mappers, mapped_column, relationship
 
 from app.database.db import Base
-from app.database.models.enums import ContactType, GameDifficulty, FearLevel
+from app.database.models.enums import ContactType, FearLevel, GameDifficulty
 
 configure_mappers()
 
