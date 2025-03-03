@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from pydantic_extra_types.coordinate import Latitude, Longitude
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
@@ -23,6 +23,8 @@ class LocationAdd(BaseModel):
 
 
 class LocationEdit(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
     uuid: UUID | None = None
     street_name: str | None = None
     street_number: str | None = None
@@ -109,6 +111,8 @@ class CompanyAdd(BaseModel):
 
 
 class CompanyEdit(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
     name: str | None = None
     brand: str | None = None
     gov_id: str | None = None
@@ -117,6 +121,7 @@ class CompanyEdit(BaseModel):
     website: str | None = None
     email: str | None = None
     phone: str | None = None
+    verified_at: str | None = None
     location: LocationEdit | None = None
 
 
