@@ -125,6 +125,7 @@ class RoomRepo(GenericRepo[Room]):
         query = (
             select(self.Model)
             .join(Location, self.Model.location_id == Location.id)
+            .where(self.Model.active.is_(True))
             .where(Location.lat.between(min_lat, max_lat))
             .where(Location.lon.between(min_lon, max_lon))
             .where(
