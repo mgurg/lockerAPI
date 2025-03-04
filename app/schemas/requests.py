@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
@@ -73,6 +74,8 @@ class RoomEdit(BaseModel):
     booking_url: str | None = None
     lm_id: str | None = None
     mt_id: str | None = None
+    active: bool | None = None
+    verified_at: datetime | None = None
     translation: list[TranslationAdd] | None = None
     supported_languages: list[LanguageAlpha2] | None = None
 
