@@ -5,6 +5,8 @@ from pydantic import BaseModel, ConfigDict
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
 
+from app.database.models.enums import GameDifficulty, FearLevel
+
 
 class BaseResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -64,6 +66,10 @@ class RoomIndexResponse(BaseResponse):
     players_max: int | None
     price_from: float | None
     duration: int | None
+    difficulty:  GameDifficulty | None = None
+    category:  str | None = None
+    fear_level:  FearLevel | None = None
+    url_yt:  str | None = None
     location: Location
     translation: RoomTranslation | None = None
     department: BasicDepartment | None = None
@@ -103,3 +109,12 @@ class CityDetailsResponse(BaseResponse):
 
 class BaseUuid(BaseResponse):
     uuid: UUID
+
+class PlaceRoomIndexResponse(BaseResponse):
+    uuid: UUID
+    url_slug: str
+    players_min: int | None
+    players_max: int | None
+    price_from: float | None
+    duration: int | None
+    translation: RoomTranslation | None = None

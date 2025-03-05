@@ -8,7 +8,7 @@ from starlette.requests import Request
 from starlette.status import HTTP_204_NO_CONTENT
 
 from app.schemas.requests import PlaceAdd
-from app.schemas.responses import CityDetailsResponse
+from app.schemas.responses import CityDetailsResponse, RoomIndexResponse, PlaceRoomIndexResponse
 from app.service.PlaceService import PlaceService
 from app.shared.text_utils import sanitize_location_input
 
@@ -27,7 +27,7 @@ async def get_places_with_rooms(place_service: placeServiceDependency, country: 
 
 @place_router.get("/{city_ascii_name}")
 async def get_city_details(
-    place_service: placeServiceDependency, city_ascii_name: str, language: LanguageAlpha2, country: CountryAlpha2
+        place_service: placeServiceDependency, city_ascii_name: str, language: LanguageAlpha2, country: CountryAlpha2
 ) -> CityDetailsResponse:
     db_city = await place_service.get_city_details(sanitize_location_input(city_ascii_name), language, country)
 
@@ -36,7 +36,7 @@ async def get_city_details(
 
 @place_router.get("/nearby_city/{city_ascii_name}")
 async def get_nearby_cities(
-    place_service: placeServiceDependency, city_ascii_name: str
+        place_service: placeServiceDependency, city_ascii_name: str
 ):
     db_city = await place_service.get_nearby_cities(sanitize_location_input(city_ascii_name))
 
@@ -44,7 +44,8 @@ async def get_nearby_cities(
 
 
 @place_router.get("/rooms/{location_name}")
-async def get_rooms_by_location(place_service: placeServiceDependency, location_name: str, language: LanguageAlpha2 | None = None):
+async def get_rooms_by_location(place_service: placeServiceDependency, location_name: str,
+                                language: LanguageAlpha2 | None = None)-> list[PlaceRoomIndexResponse]:
     db_item = await place_service.get_rooms_by_location(location_name, language)
 
     return db_item
@@ -52,9 +53,9 @@ async def get_rooms_by_location(place_service: placeServiceDependency, location_
 
 @place_router.get("/rooms/geoip")
 async def get_rooms_by_geolocation(
-    place_service: placeServiceDependency,
-    request: Request,
-    x_forwarded_for: Annotated[str | None, Header()] = None,
+        place_service: placeServiceDependency,
+        request: Request,
+        x_forwarded_for: Annotated[str | None, Header()] = None,
 ):
     client_ip_str = x_forwarded_for.split(",")[0].strip() if x_forwarded_for else request.client.host
     client_ip = IPvAnyAddress(client_ip_str)
