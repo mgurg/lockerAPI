@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
 
-from app.database.models.enums import GameDifficulty, FearLevel
+from app.database.models.enums import FearLevel, GameDifficulty
 
 
 class BaseResponse(BaseModel):
@@ -40,6 +40,7 @@ class BasicDepartment(BaseResponse):
 class BasicRoom(BaseResponse):
     uuid: UUID
     name: str
+    active: bool
 
 
 class CompanyIndexResponse(BaseResponse):
@@ -109,6 +110,7 @@ class CityDetailsResponse(BaseResponse):
 
 class BaseUuid(BaseResponse):
     uuid: UUID
+
 
 class PlaceRoomIndexResponse(BaseResponse):
     uuid: UUID

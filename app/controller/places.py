@@ -8,7 +8,7 @@ from starlette.requests import Request
 from starlette.status import HTTP_204_NO_CONTENT
 
 from app.schemas.requests import PlaceAdd
-from app.schemas.responses import CityDetailsResponse, RoomIndexResponse, PlaceRoomIndexResponse
+from app.schemas.responses import CityDetailsResponse, PlaceRoomIndexResponse
 from app.service.PlaceService import PlaceService
 from app.shared.text_utils import sanitize_location_input
 
@@ -45,7 +45,7 @@ async def get_nearby_cities(
 
 @place_router.get("/rooms/{location_name}")
 async def get_rooms_by_location(place_service: placeServiceDependency, location_name: str,
-                                language: LanguageAlpha2 | None = None)-> list[PlaceRoomIndexResponse]:
+                                language: LanguageAlpha2 | None = None) -> list[PlaceRoomIndexResponse]:
     db_item = await place_service.get_rooms_by_location(location_name, language)
 
     return db_item
