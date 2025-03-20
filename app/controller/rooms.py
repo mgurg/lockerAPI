@@ -23,9 +23,9 @@ async def get_rooms_count(room_service: roomServiceDependency) -> int:
     return db_rooms_count
 
 
-@room_router.get("/nearby/{city_ascii_name}")
-async def get_rooms_nearby(room_service: roomServiceDependency, city_ascii_name: str):
-    db_rooms_count = await room_service.get_rooms_nearby(city_ascii_name)
+@room_router.get("/nearby/{city_name}")
+async def get_rooms_nearby(room_service: roomServiceDependency, city_name: str):
+    db_rooms_count = await room_service.get_rooms_nearby(city_name)
 
     return db_rooms_count
 

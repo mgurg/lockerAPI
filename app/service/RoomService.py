@@ -55,7 +55,9 @@ class RoomService:
     async def get_room_count(self) -> int:
         return await self.room_repo.get_count()
 
-    async def get_rooms_nearby(self, city_ascii_name: str):
+    async def get_rooms_nearby(self, city_name: str):
+
+        city_ascii_name = sanitize_location_input(city_name)
         city = await self.city_repo.get_place_by_name(city_ascii_name)
         if city is None:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"City `{city_ascii_name}` not found!")

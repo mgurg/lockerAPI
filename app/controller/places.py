@@ -34,11 +34,11 @@ async def get_city_details(
     return db_city
 
 
-@place_router.get("/nearby_city/{city_ascii_name}")
+@place_router.get("/nearby_city/{city_name}")
 async def get_nearby_cities(
-        place_service: placeServiceDependency, city_ascii_name: str
+        place_service: placeServiceDependency, city_name: str
 ):
-    db_city = await place_service.get_nearby_cities(sanitize_location_input(city_ascii_name))
+    db_city = await place_service.get_nearby_cities(sanitize_location_input(city_name))
 
     return db_city
 
