@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 from fastapi import Depends, HTTPException
 from loguru import logger
 from pydantic_extra_types.country import CountryAlpha2
+from pydantic_extra_types.language_code import LanguageAlpha2
 from sqlalchemy import BinaryExpression
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
@@ -45,7 +46,8 @@ class RoomService:
 
     async def get_room_by_uuid(self, room_uuid: UUID) -> Room | None:
         db_room = await self.room_repo.get_by_uuid(room_uuid,
-                                                   ["location", "tags", "languages", "translations", "company", "department"])
+                                                   ["location", "tags", "languages", "translations", "company",
+                                                    "department"])
 
         if not db_room:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Room `{room_uuid}` not found!")
@@ -55,15 +57,21 @@ class RoomService:
     async def get_room_count(self) -> int:
         return await self.room_repo.get_count()
 
-    async def get_rooms_nearby(self, city_name: str):
-
+    async def get_rooms_nearby(self, city_name: str, lang_code: LanguageAlpha2 = "pl"):
         city_ascii_name = sanitize_location_input(city_name)
+
         city = await self.city_repo.get_place_by_name(city_ascii_name)
         if city is None:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"City `{city_ascii_name}` not found!")
 
         db_rooms = await self.room_repo.get_nearby_rooms(city.lat, city.lon, 50,
                                                          ["location", "languages", "translations"])
+
+        for room in db_rooms:
+            translation = next((t for t in room.translations if t.lang == lang_code.lower()), None)
+            room.translation = translation if translation else None
+            room.translations = []
+
         return db_rooms
 
     async def get_room_by_url_slug(self, room_url_slug: str,
@@ -81,7 +89,8 @@ class RoomService:
         if not db_room:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Room `{room_url_slug}` not found!")
 
-        translation = await self.room_translation_repo.get_translation_by_room_id_and_lang(room_id=db_room.id, lang_code=lang_code)
+        translation = await self.room_translation_repo.get_translation_by_room_id_and_lang(room_id=db_room.id,
+                                                                                           lang_code=lang_code)
 
         db_room.translation = translation
         # db_room = await self.room_repo.get_by_url_slug_and_lang(room_url_slug, lang_code, load_relations)
@@ -275,6 +284,6 @@ class RoomService:
             slug_with_city = f"{base_slug}-{sanitize_location_input(location.city)}"
             if not await self.room_exists_by_url_slug(slug_with_city):
                 return slug_with_city
-            return f"{base_slug}-{sanitize_location_input(location.city) - {sanitize_location_input(location.country)}}"
+            return f"{base_slug}-{sanitize_location_input(location.city) - {sanitize_location_input(location.country)} }"
 
         raise ValueError(f"Unable to generate a unique slug for room '{name}' at '{location.city}'")
