@@ -87,7 +87,7 @@ class SeoService:
 
         sitemap_entries = [
             self._format_sitemap_entry(
-                url=f"{base_url}/pl/escape-room/{city.name_ascii}",
+                url=f"{base_url}/pl/escape-rooms/{city.name_ascii}",
                 lastmod=city.created_at,
                 changefreq="daily",
                 priority=0.7
