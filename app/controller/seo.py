@@ -11,6 +11,13 @@ seoServiceDependency = Annotated[SeoService, Depends()]
 
 
 @seo_router.get("/sitemap", response_class=Response)
-async def loactions_sitemap(seo_service: seoServiceDependency):
-    sitemap_content = await seo_service.generate()
+async def locations_sitemap(seo_service: seoServiceDependency):
+    sitemap_content = await seo_service.generate_city_sitemap()
+    return Response(content=sitemap_content, media_type="application/xml")
+
+
+@seo_router.get("/rooms_sitemap", response_class=Response)
+async def rooms_sitemap(seo_service: seoServiceDependency):
+    sitemap_content = await seo_service.generate_rooms_sitemap()
+
     return Response(content=sitemap_content, media_type="application/xml")

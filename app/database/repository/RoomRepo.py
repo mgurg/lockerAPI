@@ -51,6 +51,13 @@ class RoomRepo(GenericRepo[Room]):
         result = await self.session.execute(query)
         return result.scalars().all()
 
+    async def get_all_active(self, load_relations: list[str] | str = None) -> Sequence[Room]:
+        query = select(self.Model).where(self.Model.active.is_(True))
+        query = self._apply_relationship_loading(query, load_relations)
+
+        result = await self.session.execute(query)
+        return result.scalars().all()
+
     async def get_count(self) -> int:
         query = select(func.count()).select_from(self.Model).where(self.Model.verified_at.isnot(None))
 
