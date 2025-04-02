@@ -7,7 +7,7 @@ from fastapi import Depends
 from pydantic_extra_types.coordinate import Latitude, Longitude
 from pydantic_extra_types.country import CountryAlpha2
 from pydantic_extra_types.language_code import LanguageAlpha2
-from sqlalchemy import BinaryExpression, select
+from sqlalchemy import BinaryExpression, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -107,7 +107,7 @@ class CityRepo(GenericRepo[City]):
         """
 
         KM_PER_DEGREE_LAT = 111  # Approximate number of kilometers per degree of latitude
-        radius_km = 20  # Radius in kilometers
+        radius_km = 30  # Radius in kilometers
 
         # Convert lat and lon to floats
         lat = float(lat)
@@ -133,6 +133,7 @@ class CityRepo(GenericRepo[City]):
                 City.lat >= min_lat, City.lat <= max_lat,
                 City.lon >= min_lon, City.lon <= max_lon
             )
+            .limit(5)  # Limit to closest 5 results
         )
 
         # Execute the query
