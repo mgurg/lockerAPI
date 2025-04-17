@@ -101,6 +101,8 @@ class RoomService:
         # translation = next((t for t in db_room.translations if t.lang == lang_code.lower()), None)
         # db_room.translation = translation if translation else None
         #
+
+        print(db_room.languages)
         return db_room
 
     async def get_rooms_by_location_and_language(self, location: str, language: str,
@@ -233,8 +235,8 @@ class RoomService:
 
         # Handle supported languages update
         if "supported_languages" in update_data:
-            # db_languages = await self.language_repo.get_by_codes(update_data["supported_languages"])
-            # update_data["languages"] = db_languages
+            db_languages = await self.language_repo.get_by_codes(update_data["supported_languages"])
+            await self.room_repo.update_languages(db_room, db_languages)
             del update_data["supported_languages"]  # Remove from update_data since it's not a direct column
 
         update_data["updated_at"] = datetime.now(UTC)  # Ensure timestamp update

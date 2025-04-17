@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.database.db import get_db
-from app.database.models.models import Location, Room, RoomTranslation
+from app.database.models.models import Location, Room, RoomTranslation, Language
 from app.database.repository.generics import GenericRepo
 
 UserDB = Annotated[AsyncSession, Depends(get_db)]
@@ -192,3 +192,11 @@ class RoomRepo(GenericRepo[Room]):
         query = select(func.count()).select_from(self.Model)
         result = await self.session.execute(query)
         return result.scalar()
+
+    async def update_languages(self, room: Room, new_languages: list[Language]) -> None:
+        room.languages.clear()  # Deletes all links in room_language_link
+        await self.session.commit()  # Flush the deletions
+
+        room.languages = new_languages
+        self.session.add(room)  # Attach to session in case it's detached
+        await self.session.commit()  # Or await self.session.commit() depending on your transaction control

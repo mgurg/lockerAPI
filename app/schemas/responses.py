@@ -37,6 +37,11 @@ class BasicDepartment(BaseResponse):
     name: str
 
 
+class BasicLanguage(BaseResponse):
+    name: str
+    code: str
+
+
 class BasicRoom(BaseResponse):
     uuid: UUID
     name: str
@@ -67,13 +72,14 @@ class RoomIndexResponse(BaseResponse):
     players_max: int | None
     price_from: float | None
     duration: int | None
-    difficulty:  GameDifficulty | None = None
-    category:  str | None = None
-    fear_level:  FearLevel | None = None
-    url_yt:  str | None = None
+    difficulty: GameDifficulty | None = None
+    category: str | None = None
+    fear_level: FearLevel | None = None
+    url_yt: str | None = None
     location: Location
     translation: RoomTranslation | None = None
     department: BasicDepartment | None = None
+    languages: list[BasicLanguage] | None = None
 
 
 class RoomsPaginated(BaseResponse):
