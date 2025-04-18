@@ -65,7 +65,7 @@ class RoomAdd(BaseModel):
 
 
 class RoomEdit(BaseModel):
-    name: str | None
+    name: str | None = None
     department_uuid: UUID | None = None
     price_from: float | None = None
     game_duration: int | None = None
