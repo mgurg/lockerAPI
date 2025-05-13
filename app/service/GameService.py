@@ -30,12 +30,12 @@ class GameService:
         start_time = perf_counter()
         try:
             client = AsyncOpenAI(api_key=settings.API_KEY_OPENAI)
-            system_msg = """You are a creative escape room game master. Maintain story continuity and create engaging \
+            system_msg = """You are a creative escape room game master. Maintain story continuity and create engaging and playable \
             puzzles that connect logically to previous events and intro. Each puzzle should have  different mechanics. \
             Provide enough information or references to real facts and persons so that the player can guess the solution.
             Respond only in Polish."""
             response = await client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4.1-mini",
                 messages=[
                     {"role": "system", "content": system_msg},
                     {"role": "user", "content": prompt},
