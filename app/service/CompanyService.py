@@ -119,11 +119,17 @@ class CompanyService:
         return None
 
     async def delete_company(self, company_uuid: UUID):
-        # Fetch company with related departments and location
-        db_company = await self.company_repo.get_by_uuid(company_uuid, ["location", "departments"])
+        # Fetch company with related departments, location, and contacts
+        db_company = await self.company_repo.get_by_uuid(company_uuid, ["location", "departments", "contacts"])
         if not db_company:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND,
                                 detail=f"Company `{company_uuid}` not found!")
+
+        # First, delete all contacts associated with the company
+        if db_company.contacts:
+            for contact in db_company.contacts:
+                logger.info(f"Removing contact: {contact.uuid}")
+                await self.contact_repo.delete(contact.id)
 
         for dept in db_company.departments:
             # 1. Delete rooms linked to the department
