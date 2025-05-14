@@ -133,7 +133,7 @@ class CompanyService:
                 await self.room_translation_repo.delete_by_room_id(room.id)
 
                 # Get room with languages loaded to properly clear M2M relationships
-                room_with_languages = await self.room_repo.get_by_id(room.id, ["languages"])
+                room_with_languages = await self.room_repo.get_by_uuid(room.uuid, ["languages"])
                 if room_with_languages and room_with_languages.languages:
                     logger.info(f"Clearing language associations for room: {room.name}")
                     room_with_languages.languages = []
