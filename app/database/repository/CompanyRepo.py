@@ -89,6 +89,11 @@ class CompanyRepo(GenericRepo[Company]):
         result = await self.session.execute(query)
         return result.scalars().first()
 
+    async def count_by_location_id(self, location_id: int) -> int:
+        query = select(func.count()).select_from(self.Model).where(self.Model.location_id == location_id)
+        result = await self.session.execute(query)
+        return result.scalar_one()
+
     async def get_company_location(self, company_id: int):
         return None
 

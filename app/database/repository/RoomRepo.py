@@ -200,3 +200,9 @@ class RoomRepo(GenericRepo[Room]):
         room.languages = new_languages
         self.session.add(room)  # Attach to session in case it's detached
         await self.session.commit()  # Or await self.session.commit() depending on your transaction control
+
+    async def get_by_department_id(self, department_id: int) -> Sequence[Room]:
+        query = select(Room).where(Room.department_id == department_id)
+
+        result = await self.session.execute(query)
+        return result.scalars().all()

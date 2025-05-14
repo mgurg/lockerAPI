@@ -10,8 +10,11 @@ from starlette.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_409_
 from app.config import get_settings
 from app.database.models.models import Company
 from app.database.repository.CompanyRepo import CompanyRepo
+from app.database.repository.ContactRepo import ContactRepo
 from app.database.repository.DepartmentRepo import DepartmentRepo
 from app.database.repository.LocationRepo import LocationRepo
+from app.database.repository.RoomRepo import RoomRepo
+from app.database.repository.RoomTranslationRepo import RoomTranslationRepo
 from app.schemas.requests import CompanyAdd, CompanyEdit, DepartmentAdd, DepartmentEdit
 
 settings = get_settings()
@@ -21,11 +24,17 @@ class CompanyService:
     def __init__(
             self,
             company_repo: Annotated[CompanyRepo, Depends()],
+            contact_repo: Annotated[ContactRepo, Depends()],
             department_repo: Annotated[DepartmentRepo, Depends()],
+            room_repo: Annotated[RoomRepo, Depends()],
+            room_translation_repo: Annotated[RoomTranslationRepo, Depends()],
             location_repo: Annotated[LocationRepo, Depends()],
     ) -> None:
         self.company_repo = company_repo
+        self.contact_repo = contact_repo
         self.department_repo = department_repo
+        self.room_repo = room_repo
+        self.room_translation_repo = room_translation_repo
         self.location_repo = location_repo
 
     async def get_all(self,
@@ -110,26 +119,51 @@ class CompanyService:
         return None
 
     async def delete_company(self, company_uuid: UUID):
+        # Fetch company with related departments and location
         db_company = await self.company_repo.get_by_uuid(company_uuid, ["location", "departments"])
         if not db_company:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND,
                                 detail=f"Company `{company_uuid}` not found!")
 
+        for dept in db_company.departments:
+            # 1. Delete rooms linked to the department
+            dept_rooms = await self.room_repo.get_by_department_id(dept.id)
+            for room in dept_rooms:
+                # First delete room translations
+                await self.room_translation_repo.delete_by_room_id(room.id)
+
+                # Get room with languages loaded to properly clear M2M relationships
+                room_with_languages = await self.room_repo.get_by_id(room.id, ["languages"])
+                if room_with_languages and room_with_languages.languages:
+                    logger.info(f"Clearing language associations for room: {room.name}")
+                    room_with_languages.languages = []
+
+                logger.info(f"Removing room: {room.name}")
+                await self.room_repo.delete(room.id)
+
+            # 2. Store department location_id before deleting the department
+            dept_location_id = dept.location_id
+
+            # 3. Delete the department itself
+            logger.info(f"Removing department: {dept.name}")
+            await self.department_repo.delete(dept.id)
+
+            # 4. Now delete the department location
+            if dept_location_id:
+                logger.info(f"Removing department location for department: {dept.name}")
+                await self.location_repo.delete(dept_location_id)
+
         # Finally delete the company
+        logger.info(f"Removing company: {db_company.name}")
         await self.company_repo.delete(db_company.id)
 
-        # Get all department IDs for deletion
-        department_ids = [dept.id for dept in db_company.departments]
-
-        # Delete all departments associated with this company
-        for dept_id in department_ids:
-            await self.department_repo.delete(dept_id)
-
-        # Check if this location is only used by this company
+        # Delete location if no other companies are using it
         location = db_company.location
         if location:
-            # Location is only associated with this company, so delete it
-            await self.location_repo.delete(location.id)
+            other_companies_using_location = await self.company_repo.count_by_location_id(location.id)
+            if other_companies_using_location == 0:
+                logger.info(f"Removing company location for company: {db_company.name}")
+                await self.location_repo.delete(location.id)
 
         return {"message": f"Company {company_uuid} and all associated data deleted successfully"}
 

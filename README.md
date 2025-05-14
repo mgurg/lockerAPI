@@ -1,5 +1,10 @@
 # lockerAPI
 
+## Docker
+```bash
+COMPOSE_BAKE=true docker compose build
+```
+
 ## Migrations
 
 New migration
