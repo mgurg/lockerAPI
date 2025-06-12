@@ -39,7 +39,7 @@ class RoomTranslationRepo(GenericRepo[RoomTranslation]):
             select(self.Model)
             .where(self.Model.room_id == room_id)
             .where(self.Model.lang.in_([lang_code, default_lang]))  # Look for both languages
-            # .order_by(self.Model.lang == lang_code.desc())  # Prefer the requested language first
+            .order_by((self.Model.lang == lang_code).desc()) # Prefer the requested language first
             .limit(1)
         )
         result = await self.session.execute(query)

@@ -83,7 +83,7 @@ class RoomService:
 
         return db_room
 
-    async def get_room_by_url_slug_and_language(self, room_url_slug, lang_code: CountryAlpha2,
+    async def get_room_by_url_slug_and_language(self, room_url_slug, lang_code: LanguageAlpha2,
                                                 load_relations: list[str | BinaryExpression] = None):
         db_room = await self.room_repo.get_by_url_slug(room_url_slug, load_relations)
         if not db_room:
@@ -91,7 +91,9 @@ class RoomService:
 
         translation = await self.room_translation_repo.get_translation_by_room_id_and_lang(room_id=db_room.id,
                                                                                            lang_code=lang_code)
-
+        if not translation:
+            await self.room_translation_repo.get_translation_by_room_id_and_lang(room_id=db_room.id,
+                                                                                 lang_code="pl")
         db_room.translation = translation
         # db_room = await self.room_repo.get_by_url_slug_and_lang(room_url_slug, lang_code, load_relations)
         # if not db_room:
@@ -102,7 +104,7 @@ class RoomService:
         # db_room.translation = translation if translation else None
         #
 
-        print(db_room.languages)
+
         return db_room
 
     async def get_rooms_by_location_and_language(self, location: str, language: str,

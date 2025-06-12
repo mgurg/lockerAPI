@@ -38,7 +38,7 @@ async def get_room_by_uuid(room_service: roomServiceDependency, room_uuid: UUID)
 
 
 @room_router.get("/url/{language}/{room_url_slug}")
-async def room_by_url_slug(room_service: roomServiceDependency, language: CountryAlpha2,
+async def room_by_url_slug(room_service: roomServiceDependency, language: LanguageAlpha2,
                            room_url_slug: str) -> RoomIndexResponse:
     db_item = await room_service.get_room_by_url_slug_and_language(
         room_url_slug, language, ["location", "translations", "department", "tags", "languages"]
